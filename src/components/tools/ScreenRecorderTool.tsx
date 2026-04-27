@@ -256,11 +256,8 @@ export default function ScreenRecorderTool({
             </svg>
           </div>
           <h3 className="text-base font-bold text-zinc-200 mb-2">Desktop Only</h3>
-          <p className="text-[13px] text-zinc-400 leading-relaxed max-w-md mx-auto mb-4">
-            Screen recording requires the Screen Capture API, which is only available on desktop browsers (Chrome, Edge, Firefox).
-          </p>
-          <p className="text-[11px] text-zinc-600">
-            Open this tool on a desktop computer to start recording.
+          <p className="text-[13px] text-zinc-400 leading-relaxed max-w-md mx-auto">
+            This tool is only available on desktop browsers.
           </p>
         </div>
       </div>
