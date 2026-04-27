@@ -138,7 +138,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Footer */}
-      <footer className="mt-4">
+      <footer className="mt-4 lg:pl-[250px]">
         <div className="gradient-line--subtle" />
         <div className="py-4 sm:py-6 bg-[#070b14]">
           <div className="px-4 sm:px-6 md:px-8">
