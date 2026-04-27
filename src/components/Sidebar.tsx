@@ -206,7 +206,7 @@ export default function Sidebar({
             onClick={onClose}
           />
           {/* Slide-out panel */}
-          <aside className="lg:hidden fixed top-0 left-0 z-50 w-[280px] h-full glass-sidebar sidebar-slide-in flex flex-col">
+          <aside className="lg:hidden fixed top-0 left-0 z-50 w-[280px] h-full glass-sidebar sidebar-slide-in flex flex-col" style={{ background: '#070b14' }}>
             {/* Mobile header */}
             <div className="flex items-center justify-between px-4 h-12 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
