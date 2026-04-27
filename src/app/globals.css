@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 /* ── Base ── */
+html, body { overscroll-behavior: none; }
 ::selection { background: rgba(34,211,238,0.35); }
 
 /* ── Scrollbar ── */
