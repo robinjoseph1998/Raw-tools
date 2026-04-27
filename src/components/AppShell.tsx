@@ -126,7 +126,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <ShortcutHelp open={shortcutHelpOpen} onClose={() => setShortcutHelpOpen(false)} />
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-0">
         <Sidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
@@ -137,26 +137,25 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
         </main>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-4 lg:pl-[250px]">
+      {/* Footer — full width below sidebar + content */}
+      <footer>
         <div className="gradient-line--subtle" />
-        <div className="py-4 sm:py-6 bg-[#070b14]">
+        <div className="py-4 sm:py-5 bg-[#070b14]">
           <div className="px-4 sm:px-6 md:px-8">
             <div className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 text-center sm:text-left">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <Logo size={20} className="opacity-60" />
-                  <span className="text-[11px] sm:text-[12px] font-semibold text-zinc-400">RAW</span>
-                  <span className="text-[10px] text-zinc-600 font-medium">v1.0</span>
+                  <Logo size={18} className="opacity-50" />
+                  <span className="text-[11px] font-semibold text-zinc-500">RAW</span>
                 </div>
                 <span className="text-zinc-800">|</span>
                 <span className="text-[10px] sm:text-[11px] text-zinc-600">28 tools &middot; 100% client-side</span>
               </div>
-              <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-zinc-700">
+              <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-zinc-600">
                 <span>&copy; {new Date().getFullYear()} RAW</span>
-                <span>&middot;</span>
+                <span className="text-zinc-800">&middot;</span>
                 <Link href="/privacy" className="hover:text-zinc-400 transition-colors">Privacy</Link>
-                <span>&middot;</span>
+                <span className="text-zinc-800">&middot;</span>
                 <Link href="/terms" className="hover:text-zinc-400 transition-colors">Terms</Link>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
-import { SITE_URL } from '@/lib/tools';
 import HomeContent from '@/components/HomeContent';
+
+const SITE_URL = 'https://www.rawtools.site';
 
 export const metadata: Metadata = {
   alternates: { canonical: '/' },
@@ -58,6 +59,15 @@ const appSchema = {
   ],
 };
 
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'RAW',
+  url: SITE_URL,
+  logo: `${SITE_URL}/favicon.svg`,
+  sameAs: [],
+};
+
 export default function Page() {
   return (
     <>
@@ -68,6 +78,10 @@ export default function Page() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
       />
       <HomeContent />
     </>

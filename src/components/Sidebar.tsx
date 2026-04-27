@@ -201,8 +201,10 @@ export default function Sidebar({
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col w-[250px] flex-shrink-0 glass-sidebar sticky top-12 h-[calc(100vh-48px)] z-30">
-        {sidebarContent}
+      <aside className="hidden lg:block w-[250px] flex-shrink-0 glass-sidebar z-30">
+        <div className="sticky top-12 h-[calc(100vh-48px)] flex flex-col">
+          {sidebarContent}
+        </div>
       </aside>
 
       {/* Mobile sidebar overlay */}

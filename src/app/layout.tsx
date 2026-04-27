@@ -36,16 +36,26 @@ export const metadata: Metadata = {
     'image converter', 'password generator', 'screen recorder', 'cron builder',
     'browser-based tools', 'client-side tools', 'free developer tools',
   ],
-  icons: { icon: '/favicon.svg' },
+  icons: { icon: '/favicon.svg', apple: '/favicon.svg' },
+  manifest: '/manifest.json',
   openGraph: {
     type: 'website',
     siteName: 'RAW Developer Toolkit',
     locale: 'en_US',
+    images: [
+      {
+        url: '/og-image.svg',
+        width: 1200,
+        height: 630,
+        alt: 'RAW — 28 Free Browser-Based Developer Tools',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'RAW — 28 Free Browser-Based Developer Tools',
     description: 'Format JSON, decode JWT, encode Base64, generate UUIDs, and more. 100% client-side.',
+    images: ['/og-image.svg'],
   },
   robots: {
     index: true,
@@ -57,9 +67,6 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  },
-  verification: {
-    google: 'G-706XC6LLSG',
   },
 };
 
