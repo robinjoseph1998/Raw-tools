@@ -1,0 +1,62 @@
+import type { Metadata } from 'next';
+import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import './globals.css';
+import AppShell from '@/components/AppShell';
+import { SITE_URL } from '@/lib/tools';
+
+const grotesk = Space_Grotesk({
+  weight: ['300', '400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-grotesk',
+  display: 'swap',
+});
+
+const jetbrains = JetBrains_Mono({
+  weight: ['400', '500', '600'],
+  subsets: ['latin'],
+  variable: '--font-jetbrains',
+  display: 'swap',
+});
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'RAW — Developer Toolkit | 28 Free Browser-Based Tools',
+    template: '%s — RAW',
+  },
+  description:
+    '28 free browser-based developer tools. Format JSON, decode JWT tokens, encode Base64, generate UUIDs, hash text, and more. 100% client-side — no data sent to servers.',
+  icons: { icon: '/favicon.svg' },
+  openGraph: {
+    type: 'website',
+    siteName: 'RAW Developer Toolkit',
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className="dark">
+      <body
+        className={`${grotesk.variable} ${jetbrains.variable} bg-[#070b14] text-zinc-200 font-sans min-h-screen antialiased`}
+      >
+        {/* Star field layers */}
+        <div className="starfield-1" aria-hidden="true" />
+        <div className="starfield-2" aria-hidden="true" />
+        <div className="starfield-3" aria-hidden="true" />
+
+        {/* Content above stars */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <AppShell>{children}</AppShell>
+        </div>
+      </body>
+    </html>
+  );
+}
