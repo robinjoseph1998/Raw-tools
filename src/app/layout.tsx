@@ -47,6 +47,13 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark bg-[#070b14]">
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5293477479330024"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body
         className={`${grotesk.variable} ${jetbrains.variable} bg-[#070b14] text-zinc-200 font-sans min-h-screen antialiased`}
       >
@@ -54,11 +61,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Script id="ga-init" strategy="afterInteractive">
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
         </Script>
-        <Script
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5293477479330024"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
         {/* Star field layers */}
         <div className="starfield-1" aria-hidden="true" />
         <div className="starfield-2" aria-hidden="true" />
