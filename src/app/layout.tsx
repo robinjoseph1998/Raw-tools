@@ -54,6 +54,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Script id="ga-init" strategy="afterInteractive">
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
         </Script>
+        <Script
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5293477479330024"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         {/* Star field layers */}
         <div className="starfield-1" aria-hidden="true" />
         <div className="starfield-2" aria-hidden="true" />
