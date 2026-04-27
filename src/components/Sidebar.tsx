@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ToolId } from '@/types';
@@ -95,6 +95,14 @@ export default function Sidebar({
   const activeTool: ToolId | null = pathname.startsWith('/tools/')
     ? SLUG_TO_TOOL[pathname.split('/')[2]] ?? null
     : null;
+
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [isOpen]);
 
   const toggleCategory = (label: string) => {
     setCollapsed((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -206,7 +214,7 @@ export default function Sidebar({
             onClick={onClose}
           />
           {/* Slide-out panel */}
-          <aside className="lg:hidden fixed top-0 left-0 z-50 w-[280px] h-full glass-sidebar sidebar-slide-in flex flex-col" style={{ background: '#070b14' }}>
+          <aside className="lg:hidden fixed inset-y-0 left-0 z-50 w-[280px] sidebar-slide-in flex flex-col overflow-hidden" style={{ background: '#070b14', height: '100dvh' }}>
             {/* Mobile header */}
             <div className="flex items-center justify-between px-4 h-12 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">
