@@ -139,7 +139,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       {/* Footer */}
       <footer className="mt-4">
         <div className="gradient-line--subtle" />
-        <div className="py-6 bg-[#070b14]/60 backdrop-blur-sm">
+        <div className="py-6 bg-[#070b14]">
           <div className="px-5 sm:px-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
               <div className="flex items-center gap-3">

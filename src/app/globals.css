@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 /* ── Base ── */
-html, body { overscroll-behavior: none; }
+html { background: #070b14; }
+html, body { overscroll-behavior: none; -webkit-overflow-scrolling: touch; }
 ::selection { background: rgba(34,211,238,0.35); }
 
 /* ── Scrollbar ── */
