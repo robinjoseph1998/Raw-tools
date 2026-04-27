@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="starfield-3" aria-hidden="true" />
 
         {/* Content above stars */}
-        <div className="relative z-10 flex flex-col min-h-screen">
+        <div className="relative z-10 flex flex-col min-h-screen" style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }}>
           <AppShell>{children}</AppShell>
         </div>
       </body>
