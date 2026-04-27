@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { StatusState } from '@/types';
 
 function formatTime(seconds: number): string {
@@ -23,6 +23,11 @@ export default function ScreenRecorderTool({
   onStatusChange: (s: StatusState) => void;
   onToast: (msg: string) => void;
 }) {
+  const isMobile = useMemo(() => {
+    if (typeof navigator === 'undefined') return false;
+    return !navigator.mediaDevices?.getDisplayMedia;
+  }, []);
+
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [micEnabled, setMicEnabled] = useState(false);
@@ -240,6 +245,27 @@ export default function ScreenRecorderTool({
     if (playbackRef.current) playbackRef.current.src = '';
     onStatusChange('idle');
   }, [cleanup, previewUrl, onStatusChange]);
+
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-xl glass-panel p-6 sm:p-8 text-center">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 mb-4">
+            <svg className="h-7 w-7 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 className="text-base font-bold text-zinc-200 mb-2">Desktop Only</h3>
+          <p className="text-[13px] text-zinc-400 leading-relaxed max-w-md mx-auto mb-4">
+            Screen recording requires the Screen Capture API, which is only available on desktop browsers (Chrome, Edge, Firefox).
+          </p>
+          <p className="text-[11px] text-zinc-600">
+            Open this tool on a desktop computer to start recording.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
