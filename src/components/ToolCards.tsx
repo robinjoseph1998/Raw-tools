@@ -477,10 +477,10 @@ const CARDS: {
 ];
 
 const CATEGORIES = [
-  { label: 'Data Transform', accent: 'text-cyan-400/70', start: 0, count: 6, cols: 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
-  { label: 'Security', accent: 'text-blue-400/70', start: 6, count: 5, cols: 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-5' },
-  { label: 'Dev Utilities', accent: 'text-purple-400/70', start: 11, count: 6, cols: 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
-  { label: 'Generate', accent: 'text-pink-400/70', start: 17, count: 11, cols: 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
+  { label: 'Data Transform', accent: 'text-cyan-400/70', start: 0, count: 6, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
+  { label: 'Security', accent: 'text-blue-400/70', start: 6, count: 5, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-5' },
+  { label: 'Dev Utilities', accent: 'text-purple-400/70', start: 11, count: 6, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
+  { label: 'Generate', accent: 'text-pink-400/70', start: 17, count: 11, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
 ];
 
 export default function ToolCards({ showShortcuts, featured }: { showShortcuts?: boolean; featured?: ToolId[] }) {
@@ -502,27 +502,27 @@ export default function ToolCards({ showShortcuts, featured }: { showShortcuts?:
     const featuredCards = featured.map((id) => CARDS.find((c) => c.id === id)).filter(Boolean) as typeof CARDS;
     return (
       <div ref={gridRef} onMouseMove={handleMouseMove}>
-        <div className={`grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3`}>
+        <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2.5 sm:gap-3`}>
           {featuredCards.map((card, i) => (
             <Link
               key={card.id}
               href={`/tools/${TOOL_SLUGS[card.id]}`}
               data-card
-              className={`group text-left rounded-xl glass-card ${card.glowClass} p-4 pb-5 hover:-translate-y-1.5 ${card.shadowHover} transition-all duration-300 cursor-pointer relative stagger-in`}
+              className={`group text-left rounded-xl glass-card ${card.glowClass} p-3.5 pb-4 sm:p-4 sm:pb-5 hover:-translate-y-1.5 ${card.shadowHover} transition-all duration-300 cursor-pointer relative stagger-in`}
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <div
                 className="pointer-events-none absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                 style={{ background: 'radial-gradient(200px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(255,255,255,0.06), transparent 60%)' }}
               />
-              <div className="flex items-center gap-2.5 mb-3 relative">
-                <div className={`h-10 w-10 rounded-lg bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-zinc-400 ${card.iconHover} transition-all duration-300 group-hover:scale-110`}>
+              <div className="flex items-center gap-2.5 mb-2.5 sm:mb-3 relative">
+                <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-zinc-400 ${card.iconHover} transition-all duration-300 group-hover:scale-110`}>
                   {card.icon}
                 </div>
                 <div className={`w-2 h-2 rounded-full ${card.accentColor} opacity-50 group-hover:opacity-100 transition-opacity duration-300`} />
               </div>
-              <h3 className="text-[14px] font-semibold text-zinc-100 mb-1.5 relative">{card.title}</h3>
-              <p className="text-[12px] text-zinc-400 leading-relaxed relative">{card.desc}</p>
+              <h3 className="text-[13px] sm:text-[14px] font-semibold text-zinc-100 mb-1 sm:mb-1.5 relative">{card.title}</h3>
+              <p className="text-[11px] sm:text-[12px] text-zinc-400 leading-relaxed relative">{card.desc}</p>
             </Link>
           ))}
         </div>
@@ -535,7 +535,7 @@ export default function ToolCards({ showShortcuts, featured }: { showShortcuts?:
       {CATEGORIES.map((cat) => (
         <div key={cat.label}>
           <p className={`text-[10px] font-bold uppercase tracking-widest mb-2 ${cat.accent}`}>{cat.label}</p>
-          <div className={`grid ${cat.cols} gap-3`}>
+          <div className={`grid ${cat.cols} gap-2.5 sm:gap-3`}>
             {CARDS.slice(cat.start, cat.start + cat.count).map((card, i) => {
               const index = cat.start + i;
               return (
@@ -543,11 +543,11 @@ export default function ToolCards({ showShortcuts, featured }: { showShortcuts?:
                   key={card.id}
                   href={`/tools/${TOOL_SLUGS[card.id]}`}
                   data-card
-                  className={`group text-left rounded-xl glass-card ${card.glowClass} p-4 pb-5 hover:-translate-y-1.5 ${card.shadowHover} transition-all duration-300 cursor-pointer relative stagger-in`}
+                  className={`group text-left rounded-xl glass-card ${card.glowClass} p-3.5 pb-4 sm:p-4 sm:pb-5 hover:-translate-y-1.5 ${card.shadowHover} transition-all duration-300 cursor-pointer relative stagger-in`}
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   {/* Top-right: shortcut badge OR ribbon */}
-                  <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+                  <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 flex items-center gap-1.5">
                     {card.badge && (
                       <span className={`inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded border ${card.badgeColor}`}>
                         {card.badge}
@@ -572,14 +572,14 @@ export default function ToolCards({ showShortcuts, featured }: { showShortcuts?:
                     }}
                   />
 
-                  <div className="flex items-center gap-2.5 mb-3 relative">
-                    <div className={`h-10 w-10 rounded-lg bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-zinc-400 ${card.iconHover} transition-all duration-300 group-hover:scale-110`}>
+                  <div className="flex items-center gap-2.5 mb-2.5 sm:mb-3 relative">
+                    <div className={`h-9 w-9 sm:h-10 sm:w-10 rounded-lg bg-white/[0.06] border border-white/[0.1] flex items-center justify-center text-zinc-400 ${card.iconHover} transition-all duration-300 group-hover:scale-110`}>
                       {card.icon}
                     </div>
                     <div className={`w-2 h-2 rounded-full ${card.accentColor} opacity-50 group-hover:opacity-100 transition-opacity duration-300`} />
                   </div>
-                  <h3 className="text-[14px] font-semibold text-zinc-100 mb-1.5 relative">{card.title}</h3>
-                  <p className="text-[12px] text-zinc-400 leading-relaxed relative">{card.desc}</p>
+                  <h3 className="text-[13px] sm:text-[14px] font-semibold text-zinc-100 mb-1 sm:mb-1.5 relative">{card.title}</h3>
+                  <p className="text-[11px] sm:text-[12px] text-zinc-400 leading-relaxed relative">{card.desc}</p>
                 </Link>
               );
             })}

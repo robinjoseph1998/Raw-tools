@@ -3,7 +3,11 @@
 @tailwind utilities;
 
 /* ── Base ── */
-html { background: #070b14; }
+html {
+  background: #070b14;
+  scroll-behavior: smooth;
+  scroll-padding-top: 3.5rem;
+}
 html, body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
@@ -502,8 +506,26 @@ body::after {
 @media (max-width: 1023px) {
   .editor-textarea { min-height: 260px; }
 }
+@media (max-width: 767px) {
+  .editor-textarea { min-height: 220px; }
+}
 @media (max-width: 639px) {
-  .editor-textarea { min-height: 200px; }
+  .editor-textarea { min-height: 180px; }
+}
+
+/* ── Touch device optimizations ── */
+@media (hover: none) and (pointer: coarse) {
+  .glass-card {
+    transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+  .glass-card:hover {
+    transform: none;
+  }
+  .glass-card:active {
+    transform: scale(0.97);
+    background: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.18);
+  }
 }
 
 /* ==========================================================
@@ -655,7 +677,7 @@ body::after {
 }
 
 /* ── Reduced motion ── */
-@media (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce), (prefers-reduced-motion: reduce) and (hover: none) {
   .starfield-1::after,
   .starfield-2::after,
   .starfield-3::after {

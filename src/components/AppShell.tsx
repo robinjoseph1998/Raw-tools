@@ -131,7 +131,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
           onClose={() => setSidebarOpen(false)}
         />
 
-        <main className="flex-1 min-w-0 px-5 sm:px-8 py-6">
+        <main className="flex-1 min-w-0 px-4 sm:px-6 md:px-8 py-4 sm:py-6">
           {children}
         </main>
       </div>
@@ -139,19 +139,19 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       {/* Footer */}
       <footer className="mt-4">
         <div className="gradient-line--subtle" />
-        <div className="py-6 bg-[#070b14]">
-          <div className="px-5 sm:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="py-4 sm:py-6 bg-[#070b14]">
+          <div className="px-4 sm:px-6 md:px-8">
+            <div className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 text-center sm:text-left">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
                   <Logo size={20} className="opacity-60" />
-                  <span className="text-[12px] font-semibold text-zinc-400">RAW</span>
+                  <span className="text-[11px] sm:text-[12px] font-semibold text-zinc-400">RAW</span>
                   <span className="text-[10px] text-zinc-600 font-medium">v1.0</span>
                 </div>
                 <span className="text-zinc-800">|</span>
-                <span className="text-[11px] text-zinc-600">28 tools &middot; 100% client-side</span>
+                <span className="text-[10px] sm:text-[11px] text-zinc-600">28 tools &middot; 100% client-side</span>
               </div>
-              <p className="text-[11px] text-zinc-700">
+              <p className="text-[10px] sm:text-[11px] text-zinc-700">
                 &copy; {new Date().getFullYear()} RAW &middot; Privacy-first developer tools
               </p>
             </div>

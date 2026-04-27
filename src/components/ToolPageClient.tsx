@@ -88,8 +88,8 @@ export default function ToolPageClient({ toolId }: { toolId: ToolId }) {
   return (
     <div className="animate-fade-in">
       {/* Back button — mobile only */}
-      <div className="flex items-center justify-between mb-5 lg:hidden">
-        <Link href="/" className="btn-ghost inline-flex items-center gap-1.5 text-[13px]">
+      <div className="flex items-center justify-between mb-4 sm:mb-5 lg:hidden">
+        <Link href="/" className="btn-ghost inline-flex items-center gap-2 py-2 text-xs sm:text-[13px]">
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path d="M15 19l-7-7 7-7" />
           </svg>
@@ -99,14 +99,14 @@ export default function ToolPageClient({ toolId }: { toolId: ToolId }) {
       </div>
 
       {/* Tool header */}
-      <div className="mb-6 flex items-start gap-3">
+      <div className="mb-4 sm:mb-6 flex items-start gap-3">
         <div className={`w-1.5 h-8 rounded-full ${meta.accent} opacity-80 flex-shrink-0 mt-0.5`} />
         <div>
           <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
             {TOOL_CATEGORY[toolId]} <span className="text-zinc-600 mx-1">/</span> <span className="text-zinc-300">{meta.title}</span>
           </p>
-          <h1 className="text-xl font-bold text-white mb-1">{meta.title}</h1>
-          <p className="text-[13px] text-zinc-400">{meta.desc}</p>
+          <h1 className="text-lg sm:text-xl font-bold text-white mb-1">{meta.title}</h1>
+          <p className="text-xs sm:text-[13px] text-zinc-400">{meta.desc}</p>
         </div>
       </div>
 
@@ -126,7 +126,7 @@ export default function ToolPageClient({ toolId }: { toolId: ToolId }) {
             <Link
               key={relId}
               href={`/tools/${TOOL_SLUGS[relId]}`}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-200 group"
+              className="inline-flex items-center gap-2 px-3 py-2 sm:py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-200 group"
             >
               <div className={`w-1 h-1 rounded-full ${TOOL_META[relId].accent} opacity-50 group-hover:opacity-100 transition-opacity`} />
               <span className="text-[12px] font-medium text-zinc-400 group-hover:text-zinc-200 transition-colors">
@@ -139,13 +139,13 @@ export default function ToolPageClient({ toolId }: { toolId: ToolId }) {
 
       {/* SEO content section */}
       {content && (
-        <div className="mt-10 pt-8 border-t border-white/[0.04]">
+        <div className="mt-6 sm:mt-10 pt-6 sm:pt-8 border-t border-white/[0.04]">
           {/* About */}
           <section className="mb-8">
             <h2 className="text-[13px] font-bold text-zinc-400 uppercase tracking-widest mb-3">
               About {meta.title}
             </h2>
-            <p className="text-[13px] text-zinc-500 leading-relaxed max-w-2xl">
+            <p className="text-xs sm:text-[13px] text-zinc-500 leading-relaxed max-w-2xl">
               {content.about}
             </p>
           </section>
@@ -157,7 +157,7 @@ export default function ToolPageClient({ toolId }: { toolId: ToolId }) {
             </h2>
             <ol className="space-y-2 max-w-2xl">
               {content.steps.map((step, i) => (
-                <li key={i} className="flex gap-3 text-[13px] text-zinc-500 leading-relaxed">
+                <li key={i} className="flex gap-3 text-xs sm:text-[13px] text-zinc-500 leading-relaxed">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-[10px] font-bold text-zinc-600 mt-0.5">
                     {i + 1}
                   </span>

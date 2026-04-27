@@ -53,16 +53,16 @@ export default function HomeContent() {
   return (
     <div className="animate-fade-in">
       {/* Hero: left text + right code preview */}
-      <div className="mb-8 flex flex-col xl:flex-row xl:items-start xl:gap-10">
+      <div className="mb-8 flex flex-col md:flex-row md:items-start md:gap-8 xl:gap-10">
         <div className="flex-1 min-w-0">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/[0.08] mb-5">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-status-pulse" />
             <span className="text-[11px] font-bold text-cyan-300 uppercase tracking-wider">28 Tools &middot; 100% Client-Side</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-cyan-200 to-purple-200 bg-clip-text text-transparent leading-tight hero-shimmer">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-cyan-200 to-purple-200 bg-clip-text text-transparent leading-tight hero-shimmer">
             The Developer Toolkit<br className="hidden sm:block" /> That Just Works
           </h1>
-          <p className="text-[15px] text-zinc-300/80 max-w-xl leading-[1.8] tracking-wide mb-5" style={{ fontWeight: 400 }}>
+          <p className="text-sm sm:text-[15px] text-zinc-300/80 max-w-xl leading-[1.8] tracking-wide mb-5" style={{ fontWeight: 400 }}>
             Stop juggling between dozens of browser tabs and random online tools.
             RAW brings everything you need into one clean, unified interface &mdash; format JSON,
             convert data, decode tokens, and more.
@@ -70,7 +70,7 @@ export default function HomeContent() {
 
           <SmartPasteHero />
 
-          <div className="flex items-center gap-3 mt-3">
+          <div className="hidden sm:flex items-center gap-3 mt-3">
             <span className="text-[12px] text-zinc-600">
               or press <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium bg-white/[0.04] border border-white/[0.06] rounded mx-0.5">⌘K</kbd> to search
             </span>
@@ -81,13 +81,13 @@ export default function HomeContent() {
           </div>
         </div>
 
-        <div className="flex-shrink-0 w-full xl:w-[420px] mt-8 xl:mt-0 animate-float">
+        <div className="flex-shrink-0 w-full md:w-[340px] lg:w-[380px] xl:w-[420px] mt-8 md:mt-0 animate-float">
           <HeroCode />
         </div>
       </div>
 
       {/* Trust strip */}
-      <div className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
         {FEATURES.map((f, i) => (
           <div
             key={f.label}
@@ -98,8 +98,8 @@ export default function HomeContent() {
               {FEATURE_ICONS[i]}
             </div>
             <div className="min-w-0">
-              <p className="text-[13px] font-semibold text-zinc-200">{f.label}</p>
-              <p className="text-[11px] text-zinc-400">{f.detail}</p>
+              <p className="text-xs sm:text-[13px] font-semibold text-zinc-200">{f.label}</p>
+              <p className="text-[10px] sm:text-[11px] text-zinc-400">{f.detail}</p>
             </div>
           </div>
         ))}
@@ -193,15 +193,15 @@ export default function HomeContent() {
           <div className="w-4 h-[1px] bg-gradient-to-r from-purple-500/50 to-transparent" />
           Why developers choose RAW
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {WHY_ITEMS.map((item, i) => (
             <div key={item.title} className={`flex gap-3.5 rounded-xl glass-panel p-4 hover:bg-white/[0.06] transition-colors duration-300 ${whyVisible ? 'reveal-up' : 'opacity-0'}`} style={whyVisible ? { animationDelay: `${i * 120}ms` } : undefined}>
               <div className={`h-9 w-9 rounded-lg border flex items-center justify-center flex-shrink-0 mt-0.5 ${item.accent}`}>
                 {WHY_ICONS[i]}
               </div>
               <div className="min-w-0">
-                <p className="text-[13px] text-zinc-100 font-semibold mb-1">{item.title}</p>
-                <p className="text-[12px] text-zinc-400 leading-relaxed">{item.desc}</p>
+                <p className="text-xs sm:text-[13px] text-zinc-100 font-semibold mb-1">{item.title}</p>
+                <p className="text-[11px] sm:text-[12px] text-zinc-400 leading-relaxed">{item.desc}</p>
               </div>
             </div>
           ))}
