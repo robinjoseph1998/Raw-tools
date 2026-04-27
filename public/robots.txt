@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://rawdev.tools/sitemap.xml
+Sitemap: https://www.rawtools.site/sitemap.xml

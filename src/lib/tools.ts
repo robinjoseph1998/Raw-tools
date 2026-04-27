@@ -1,7 +1,7 @@
 import type { ToolId } from '@/types';
 
 // ── Site config ──
-export const SITE_URL = 'https://rawdev.tools';
+export const SITE_URL = 'https://www.rawtools.site';
 
 // ── Tool metadata ──
 export const TOOL_META: Record<ToolId, { title: string; desc: string; accent: string }> = {
