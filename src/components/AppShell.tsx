@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ToolId } from '@/types';
 import { AppProvider, useAppContext } from '@/contexts/AppContext';
@@ -151,9 +152,13 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                 <span className="text-zinc-800">|</span>
                 <span className="text-[10px] sm:text-[11px] text-zinc-600">28 tools &middot; 100% client-side</span>
               </div>
-              <p className="text-[10px] sm:text-[11px] text-zinc-700">
-                &copy; {new Date().getFullYear()} RAW &middot; Privacy-first developer tools
-              </p>
+              <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-zinc-700">
+                <span>&copy; {new Date().getFullYear()} RAW</span>
+                <span>&middot;</span>
+                <Link href="/privacy" className="hover:text-zinc-400 transition-colors">Privacy</Link>
+                <span>&middot;</span>
+                <Link href="/terms" className="hover:text-zinc-400 transition-colors">Terms</Link>
+              </div>
             </div>
           </div>
         </div>

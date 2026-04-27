@@ -29,6 +29,13 @@ export const metadata: Metadata = {
   },
   description:
     '28 free browser-based developer tools. Format JSON, decode JWT tokens, encode Base64, generate UUIDs, hash text, and more. 100% client-side — no data sent to servers.',
+  keywords: [
+    'developer tools', 'online tools', 'JSON formatter', 'JWT decoder', 'Base64 encoder',
+    'UUID generator', 'hash generator', 'regex tester', 'URL encoder', 'data converter',
+    'SQL formatter', 'QR code generator', 'color picker', 'markdown preview',
+    'image converter', 'password generator', 'screen recorder', 'cron builder',
+    'browser-based tools', 'client-side tools', 'free developer tools',
+  ],
   icons: { icon: '/favicon.svg' },
   openGraph: {
     type: 'website',
@@ -37,10 +44,22 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
+    title: 'RAW — 28 Free Browser-Based Developer Tools',
+    description: 'Format JSON, decode JWT, encode Base64, generate UUIDs, and more. 100% client-side.',
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'G-706XC6LLSG',
   },
 };
 
