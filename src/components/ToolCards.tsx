@@ -9,7 +9,7 @@ import { TOOL_SLUGS } from '@/lib/tools';
   Color system — 4 semantic categories:
   ┌─ cyan   → Data Transform (6): Format, Convert, URL Encode, Diff, SQL Formatter, JSON→TS
   ├─ blue   → Security (5):       JWT Decoder, JWT Encoder, Hash, Password, Screen Recorder
-  ├─ purple → Dev Utilities (6):  UUID, Regex, Timestamp, Markdown Preview, Epoch Converter, Cron Builder
+  ├─ purple → Dev Utilities (7):  UUID, Regex, Timestamp, Markdown Preview, Epoch Converter, Cron Builder, PX↔REM
   └─ pink   → Generate (11):      Base64, Color, Lorem, Base64→Image, Image→Base64, Image Convert, QR, CSS Gradient, Placeholder, BG Remover, Image Compress
 */
 
@@ -297,6 +297,23 @@ const CARDS: {
       </svg>
     ),
   },
+  {
+    id: 'px-converter',
+    title: 'PX ↔ REM',
+    desc: 'Convert pixels to rem & Tailwind spacing classes',
+    glowClass: 'glass-card--purple',
+    iconHover: 'group-hover:text-purple-400 group-hover:border-purple-500/25',
+    shadowHover: 'hover:shadow-glow-purple',
+    accentColor: 'bg-purple-400',
+    badge: 'New',
+    badgeColor: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path d="M4 6h16M4 12h8m-8 6h16" />
+        <path d="M15 9l3 3-3 3" />
+      </svg>
+    ),
+  },
 
   // ── Row 4: Encode / Generate (pink) ──
   {
@@ -479,8 +496,8 @@ const CARDS: {
 const CATEGORIES = [
   { label: 'Data Transform', accent: 'text-cyan-400/70', start: 0, count: 6, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
   { label: 'Security', accent: 'text-blue-400/70', start: 6, count: 5, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-5' },
-  { label: 'Dev Utilities', accent: 'text-purple-400/70', start: 11, count: 6, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
-  { label: 'Generate', accent: 'text-pink-400/70', start: 17, count: 11, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
+  { label: 'Dev Utilities', accent: 'text-purple-400/70', start: 11, count: 7, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7' },
+  { label: 'Generate', accent: 'text-pink-400/70', start: 18, count: 11, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
 ];
 
 export default function ToolCards({ showShortcuts, featured }: { showShortcuts?: boolean; featured?: ToolId[] }) {
@@ -554,7 +571,7 @@ export default function ToolCards({ showShortcuts, featured }: { showShortcuts?:
                       </span>
                     )}
                     {showShortcuts && (() => {
-                      const LETTER_KEYS: Record<string, string> = { uuid: 'U', regex: 'R', timestamp: 'T', markdown: 'M', epoch: 'D', cron: 'X', 'screen-recorder': 'W', base64: 'E', color: 'C', lorem: 'L', 'base64-image': 'B', 'image-base64': 'I', 'image-convert': 'F', qr: 'Q', gradient: 'G', placeholder: 'P', 'bg-remover': 'A', 'image-compress': 'K' };
+                      const LETTER_KEYS: Record<string, string> = { uuid: 'U', regex: 'R', timestamp: 'T', markdown: 'M', epoch: 'D', cron: 'X', 'px-converter': 'Y', 'screen-recorder': 'W', base64: 'E', color: 'C', lorem: 'L', 'base64-image': 'B', 'image-base64': 'I', 'image-convert': 'F', qr: 'Q', gradient: 'G', placeholder: 'P', 'bg-remover': 'A', 'image-compress': 'K' };
                       const label = index < 10 ? (index === 9 ? '0' : String(index + 1)) : LETTER_KEYS[card.id] || null;
                       return label ? (
                         <kbd className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-zinc-500 group-hover:text-zinc-200 bg-white/[0.05] border border-white/[0.1] group-hover:border-white/[0.2] group-hover:bg-white/[0.08] rounded transition-all duration-300">

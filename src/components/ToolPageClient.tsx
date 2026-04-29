@@ -37,6 +37,7 @@ import CronBuilderTool from '@/components/tools/CronBuilderTool';
 const BgRemoverTool = dynamic(() => import('@/components/tools/BgRemoverTool'), { ssr: false });
 import ImageCompressTool from '@/components/tools/ImageCompressTool';
 import ScreenRecorderTool from '@/components/tools/ScreenRecorderTool';
+import PxConverterTool from '@/components/tools/PxConverterTool';
 
 function renderTool(toolId: ToolId, p: { onStatusChange: (s: import('@/types').StatusState) => void; onToast: (msg: string) => void }) {
   switch (toolId) {
@@ -68,6 +69,7 @@ function renderTool(toolId: ToolId, p: { onStatusChange: (s: import('@/types').S
     case 'bg-remover': return <BgRemoverTool {...p} />;
     case 'image-compress': return <ImageCompressTool {...p} />;
     case 'screen-recorder': return <ScreenRecorderTool {...p} />;
+    case 'px-converter': return <PxConverterTool {...p} />;
     default: return null;
   }
 }

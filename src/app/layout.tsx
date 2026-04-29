@@ -24,11 +24,11 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'RAW — Developer Toolkit | 28 Free Browser-Based Tools',
+    default: 'RAW — Developer Toolkit | 29 Free Browser-Based Tools',
     template: '%s — RAW',
   },
   description:
-    '28 free browser-based developer tools. Format JSON, decode JWT tokens, encode Base64, generate UUIDs, hash text, and more. 100% client-side — no data sent to servers.',
+    '29 free browser-based developer tools. Format JSON, decode JWT tokens, encode Base64, generate UUIDs, hash text, and more. 100% client-side — no data sent to servers.',
   keywords: [
     'developer tools', 'online tools', 'JSON formatter', 'JWT decoder', 'Base64 encoder',
     'UUID generator', 'hash generator', 'regex tester', 'URL encoder', 'data converter',
@@ -47,13 +47,13 @@ export const metadata: Metadata = {
         url: '/og-image.svg',
         width: 1200,
         height: 630,
-        alt: 'RAW — 28 Free Browser-Based Developer Tools',
+        alt: 'RAW — 29 Free Browser-Based Developer Tools',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RAW — 28 Free Browser-Based Developer Tools',
+    title: 'RAW — 29 Free Browser-Based Developer Tools',
     description: 'Format JSON, decode JWT, encode Base64, generate UUIDs, and more. 100% client-side.',
     images: ['/og-image.svg'],
   },

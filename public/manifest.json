@@ -1,7 +1,7 @@
 {
   "name": "RAW Developer Toolkit",
   "short_name": "RAW",
-  "description": "28 free browser-based developer tools. Format JSON, decode JWT, encode Base64, generate UUIDs, and more. 100% client-side.",
+  "description": "29 free browser-based developer tools. Format JSON, decode JWT, encode Base64, generate UUIDs, and more. 100% client-side.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#070b14",

@@ -57,6 +57,7 @@ const CATEGORIES: {
       { id: 'epoch', title: 'Epoch Converter' },
       { id: 'cron', title: 'Cron Builder' },
       { id: 'screen-recorder', title: 'Screen Recorder' },
+      { id: 'px-converter', title: 'PX ↔ REM' },
     ],
   },
   {

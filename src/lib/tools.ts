@@ -33,6 +33,7 @@ export const TOOL_META: Record<ToolId, { title: string; desc: string; accent: st
   'bg-remover': { title: 'BG Remover', desc: 'Remove image backgrounds with AI — runs 100% in your browser using on-device ML.', accent: 'bg-pink-400' },
   'image-compress': { title: 'Image Compress', desc: 'Compress images with adjustable quality, format selection, and before/after size comparison.', accent: 'bg-pink-400' },
   'screen-recorder': { title: 'Screen Recorder', desc: 'Record your screen, window, or browser tab with optional mic audio. Download as WebM.', accent: 'bg-blue-400' },
+  'px-converter': { title: 'PX ↔ REM / Tailwind', desc: 'Convert pixels to rem units and Tailwind CSS spacing classes. Configurable base font size.', accent: 'bg-purple-400' },
 };
 
 // ── SEO-friendly URL slugs ──
@@ -65,6 +66,7 @@ export const TOOL_SLUGS: Record<ToolId, string> = {
   placeholder: 'placeholder-image',
   'bg-remover': 'background-remover',
   'image-compress': 'image-compressor',
+  'px-converter': 'pixel-to-rem-tailwind-converter',
 };
 
 // Reverse mapping: slug → ToolId
@@ -102,13 +104,14 @@ export const TOOL_SEO: Record<ToolId, { title: string; description: string }> = 
   placeholder: { title: 'Placeholder Image Generator', description: 'Generate placeholder images with custom dimensions, colors, and overlay text. Free online placeholder image tool.' },
   'bg-remover': { title: 'Background Remover — Remove Image Background Free', description: 'Remove image backgrounds using AI — runs 100% in your browser with on-device machine learning. No uploads, completely private.' },
   'image-compress': { title: 'Image Compressor — Compress Images Online', description: 'Compress images with adjustable quality control and format selection. Compare before/after file sizes. Free online image compressor.' },
+  'px-converter': { title: 'PX to REM & Tailwind Converter', description: 'Convert pixels to rem units and Tailwind CSS spacing classes instantly. Configurable base font size. Free online px to rem converter.' },
 };
 
 // Card order matches the 4×3 grid layout (by category rows)
 export const TOOL_ORDER: ToolId[] = [
   'format', 'convert', 'url', 'diff', 'sql', 'json-ts',           // cyan row (6)
   'jwt', 'jwt-encode', 'hash', 'password', 'screen-recorder',      // blue row (5)
-  'uuid', 'regex', 'timestamp', 'markdown', 'epoch', 'cron',       // purple row (6)
+  'uuid', 'regex', 'timestamp', 'markdown', 'epoch', 'cron', 'px-converter', // purple row (7)
   'base64', 'color', 'lorem', 'base64-image', 'image-base64', 'image-convert', 'qr', 'gradient', 'placeholder', 'bg-remover', 'image-compress', // pink row (11)
 ];
 
@@ -143,18 +146,19 @@ export const RELATED_TOOLS: Record<ToolId, ToolId[]> = {
   'bg-remover': ['image-compress', 'image-convert', 'image-base64'],
   'image-compress': ['bg-remover', 'image-convert', 'screen-recorder'],
   'screen-recorder': ['image-compress', 'image-convert', 'qr'],
+  'px-converter': ['color', 'gradient', 'json-ts'],
 };
 
 export const TOOL_CATEGORY: Record<ToolId, string> = {
   format: 'Data Transform', convert: 'Data Transform', url: 'Data Transform', diff: 'Data Transform', sql: 'Data Transform', 'json-ts': 'Data Transform',
   jwt: 'Security', 'jwt-encode': 'Security', hash: 'Security', password: 'Security', 'screen-recorder': 'Security',
-  uuid: 'Dev Utilities', regex: 'Dev Utilities', timestamp: 'Dev Utilities', markdown: 'Dev Utilities', epoch: 'Dev Utilities', cron: 'Dev Utilities',
+  uuid: 'Dev Utilities', regex: 'Dev Utilities', timestamp: 'Dev Utilities', markdown: 'Dev Utilities', epoch: 'Dev Utilities', cron: 'Dev Utilities', 'px-converter': 'Dev Utilities',
   base64: 'Generate', color: 'Generate', lorem: 'Generate', 'base64-image': 'Generate', 'image-base64': 'Generate', 'image-convert': 'Generate', qr: 'Generate', gradient: 'Generate', placeholder: 'Generate', 'bg-remover': 'Generate', 'image-compress': 'Generate',
 };
 
 // ── Keyboard shortcuts ──
 export const LETTER_SHORTCUTS: Record<string, ToolId> = {
-  u: 'uuid', r: 'regex', t: 'timestamp', m: 'markdown', d: 'epoch', x: 'cron',
+  u: 'uuid', r: 'regex', t: 'timestamp', m: 'markdown', d: 'epoch', x: 'cron', y: 'px-converter',
   e: 'base64', c: 'color', l: 'lorem', b: 'base64-image', i: 'image-base64',
   f: 'image-convert', q: 'qr', g: 'gradient', p: 'placeholder',
   a: 'bg-remover', k: 'image-compress', w: 'screen-recorder',
@@ -209,7 +213,7 @@ export const FEATURES = [
 export const WHY_ITEMS = [
   { title: 'Paste anything, we figure it out', desc: 'RAW auto-detects what you paste \u2014 JSON, JWT, Base64, URLs, timestamps \u2014 and routes you to the right tool instantly. No menus, no guessing.', accent: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
   { title: 'Your data never leaves your browser', desc: 'Everything runs client-side. Paste API keys, tokens, or sensitive data with confidence. Zero servers, zero tracking, zero risk.', accent: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-  { title: '28 tools, zero tab juggling', desc: 'JSON formatter, JWT decoder, regex tester, hash generator, and more. Stop bookmarking dozens of different websites.', accent: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
+  { title: '29 tools, zero tab juggling', desc: 'JSON formatter, JWT decoder, regex tester, hash generator, and more. Stop bookmarking dozens of different websites.', accent: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
   { title: 'Built for keyboard-first developers', desc: '\u2318K to search, number keys to jump, ESC to go back. Full keyboard navigation means your hands never leave the keyboard.', accent: 'text-pink-400 bg-pink-500/10 border-pink-500/20' },
 ];
 
@@ -609,6 +613,20 @@ export const TOOL_CONTENT: Record<ToolId, { about: string; steps: string[]; faq:
       { q: 'How much can images be compressed?', a: 'Compression ratios vary by image content and format. JPEG images can often be reduced 50-80% with minimal visible quality loss. WebP typically achieves even better compression than JPEG at the same quality level.' },
       { q: 'Is any quality lost during compression?', a: 'JPEG and WebP use lossy compression, so some quality is lost (controlled by the quality slider). PNG compression is lossless — file size reduction comes from optimizing the encoding, not removing data.' },
       { q: 'Which output format should I choose?', a: 'WebP offers the best compression-to-quality ratio and is supported by all modern browsers. JPEG is universally compatible. PNG is best when you need lossless quality or transparency.' },
+    ],
+  },
+  'px-converter': {
+    about: 'Convert pixel values to rem units and Tailwind CSS spacing classes instantly. RAW\'s PX to REM converter supports configurable base font sizes and shows the closest Tailwind class match. Essential for responsive design workflows and migrating from fixed pixel layouts to relative units.',
+    steps: [
+      'Enter a pixel value in the input field.',
+      'View the converted rem value and matching Tailwind CSS class.',
+      'Adjust the base font size if your project uses a non-standard root size.',
+      'Copy any value with one click or browse the reference table for common conversions.',
+    ],
+    faq: [
+      { q: 'What is the default base font size?', a: 'Browsers use 16px as the default root font size. This means 1rem = 16px by default. If your project sets a different root font size (e.g., 10px or 14px), adjust the base size in the tool to get accurate conversions.' },
+      { q: 'How does Tailwind CSS spacing work?', a: 'Tailwind uses a spacing scale where each unit equals 4px by default (e.g., p-4 = 16px, m-8 = 32px). If your pixel value doesn\'t match an exact Tailwind class, the tool shows the closest match and the arbitrary value syntax like p-[18px].' },
+      { q: 'Why should I use rem instead of px?', a: 'Rem units scale with the user\'s browser font size setting, making your layout more accessible. Users who increase their default font size for readability will see your entire layout scale proportionally, unlike fixed pixel values.' },
     ],
   },
 };

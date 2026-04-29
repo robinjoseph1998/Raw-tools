@@ -2,7 +2,7 @@ export type Result<T> =
   | { success: true; data: T }
   | { success: false; error: string };
 
-export type ToolId = 'format' | 'convert' | 'jwt' | 'jwt-encode' | 'base64' | 'url' | 'hash' | 'uuid' | 'color' | 'regex' | 'timestamp' | 'lorem' | 'base64-image' | 'image-base64' | 'image-convert' | 'diff' | 'password' | 'qr' | 'markdown' | 'sql' | 'gradient' | 'json-ts' | 'epoch' | 'placeholder' | 'cron' | 'bg-remover' | 'image-compress' | 'screen-recorder';
+export type ToolId = 'format' | 'convert' | 'jwt' | 'jwt-encode' | 'base64' | 'url' | 'hash' | 'uuid' | 'color' | 'regex' | 'timestamp' | 'lorem' | 'base64-image' | 'image-base64' | 'image-convert' | 'diff' | 'password' | 'qr' | 'markdown' | 'sql' | 'gradient' | 'json-ts' | 'epoch' | 'placeholder' | 'cron' | 'bg-remover' | 'image-compress' | 'screen-recorder' | 'px-converter';
 
 export type UrlMode = 'encode' | 'decode';
 

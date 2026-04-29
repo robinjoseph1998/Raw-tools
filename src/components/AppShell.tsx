@@ -149,7 +149,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                   <span className="text-[11px] font-semibold text-zinc-500">RAW</span>
                 </div>
                 <span className="text-zinc-800">|</span>
-                <span className="text-[10px] sm:text-[11px] text-zinc-600">28 tools &middot; 100% client-side</span>
+                <span className="text-[10px] sm:text-[11px] text-zinc-600">29 tools &middot; 100% client-side</span>
               </div>
               <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-zinc-600">
                 <span>&copy; {new Date().getFullYear()} RAW</span>
