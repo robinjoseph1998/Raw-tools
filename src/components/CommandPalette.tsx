@@ -104,7 +104,7 @@ export default function CommandPalette({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-center pt-[15vh]" onClick={onClose}>
+    <div className="fixed inset-0 z-[200] flex items-start justify-center pt-[8vh] sm:pt-[15vh]" onClick={onClose}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
 
@@ -134,7 +134,7 @@ export default function CommandPalette({
         </div>
 
         {/* Results */}
-        <div className="max-h-[320px] overflow-y-auto py-2">
+        <div className="max-h-[60vh] sm:max-h-[320px] overflow-y-auto py-2">
           {filtered.length === 0 ? (
             <div className="px-4 py-8 text-center">
               <p className="text-[13px] text-zinc-500">No tools found</p>
@@ -151,15 +151,13 @@ export default function CommandPalette({
               >
                 <div className={`w-1 h-1 rounded-full flex-shrink-0 ${TOOL_DOT_COLORS[tool.id]} ${i === activeIndex ? 'opacity-100' : 'opacity-50'} transition-opacity`} />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[13px] font-semibold ${i === activeIndex ? 'text-zinc-100' : 'text-zinc-300'}`}>
-                      {tool.title}
-                    </span>
-                    <span className={`text-[10px] ${TOOL_TEXT_COLORS[tool.id]}`}>{tool.desc}</span>
-                  </div>
+                  <span className={`text-[13px] font-semibold ${i === activeIndex ? 'text-zinc-100' : 'text-zinc-300'}`}>
+                    {tool.title}
+                  </span>
+                  <span className={`hidden sm:inline text-[10px] ml-2 ${TOOL_TEXT_COLORS[tool.id]}`}>{tool.desc}</span>
                 </div>
                 {tool.shortcut && (
-                  <kbd className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold text-zinc-600 bg-white/[0.04] border border-white/[0.08] rounded">
+                  <kbd className="hidden sm:inline-flex flex-shrink-0 items-center justify-center w-5 h-5 text-[10px] font-bold text-zinc-600 bg-white/[0.04] border border-white/[0.08] rounded">
                     {tool.shortcut}
                   </kbd>
                 )}
@@ -168,8 +166,8 @@ export default function CommandPalette({
           )}
         </div>
 
-        {/* Footer hints */}
-        <div className="flex items-center gap-4 px-4 py-2 border-t border-white/[0.06] bg-white/[0.01]">
+        {/* Footer hints — hidden on mobile */}
+        <div className="hidden sm:flex items-center gap-4 px-4 py-2 border-t border-white/[0.06] bg-white/[0.01]">
           <span className="flex items-center gap-1.5 text-[10px] text-zinc-600">
             <kbd className="inline-flex items-center px-1 py-0.5 text-[9px] font-medium bg-white/[0.04] border border-white/[0.06] rounded">↑↓</kbd>
             Navigate

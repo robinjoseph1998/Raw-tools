@@ -48,7 +48,7 @@ export default function EditorPanel({
   );
 
   return (
-    <section className="flex flex-col min-h-[420px] lg:min-h-[460px] rounded-xl glass-panel overflow-hidden transition-all duration-300 focus-within:border-[#3a3a3a]">
+    <section className="flex flex-col min-h-[320px] sm:min-h-[380px] lg:min-h-[460px] rounded-xl glass-panel overflow-hidden transition-all duration-300 focus-within:border-[#3a3a3a]">
       {/* Header */}
       <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/[0.08] bg-white/[0.03]">
         <div className="flex items-center gap-2.5">
@@ -82,7 +82,7 @@ export default function EditorPanel({
           autoCapitalize="off"
         />
       ) : (
-        <div className="relative flex-1 min-h-[380px] lg:min-h-[400px] overflow-hidden">
+        <div className="relative flex-1 min-h-[260px] sm:min-h-[340px] lg:min-h-[400px] overflow-hidden">
           {outputHtml ? (
             <div className="animate-fade-in">
               <pre

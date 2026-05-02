@@ -184,8 +184,8 @@ export default function Sidebar({
         })}
       </div>
 
-      {/* Pro Tip at bottom */}
-      <div className="mx-3 mb-3 p-3 rounded-lg bg-[#141414] border border-[#262626]">
+      {/* Pro Tip at bottom — hidden on mobile sidebar since it's a keyboard shortcut */}
+      <div className="hidden lg:block mx-3 mb-3 p-3 rounded-lg bg-[#141414] border border-[#262626]">
         <div className="flex items-center gap-2 mb-1.5">
           <svg className="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path d="M13 10V3L4 14h7v7l9-11h-7z" />

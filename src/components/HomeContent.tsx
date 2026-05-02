@@ -56,18 +56,18 @@ export default function HomeContent() {
   return (
     <div className="animate-fade-in">
       {/* Hero: left text + right code preview */}
-      <div className="mb-8 flex flex-col md:flex-row md:items-start md:gap-8 xl:gap-10">
+      <div className="mb-6 sm:mb-8 flex flex-col md:flex-row md:items-start md:gap-8 xl:gap-10">
         <div className="flex-1 min-w-0">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#333] bg-white/[0.03] mb-5">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full border border-[#333] bg-white/[0.03] mb-4 sm:mb-5">
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-status-pulse" />
-            <span className="text-[11px] font-bold text-[#a1a1a1] uppercase tracking-wider">30 Tools &middot; 100% Client-Side</span>
+            <span className="text-[10px] sm:text-[11px] font-bold text-[#a1a1a1] uppercase tracking-wider">30 Tools &middot; 100% Client-Side</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 leading-tight">
             <span className="text-[#fafafa]">The Developer Toolkit</span>
-            <br className="hidden sm:block" />
+            <br />
             <span className="hero-gradient-text">That Just Works</span>
           </h1>
-          <p className="text-sm sm:text-[15px] text-zinc-300/80 max-w-xl leading-[1.8] tracking-wide mb-5" style={{ fontWeight: 400 }}>
+          <p className="text-[13px] sm:text-sm md:text-[15px] text-zinc-300/80 max-w-xl leading-[1.7] sm:leading-[1.8] tracking-wide mb-4 sm:mb-5" style={{ fontWeight: 400 }}>
             Stop juggling between dozens of browser tabs and random online tools.
             RAW brings everything you need into one clean, unified interface &mdash; format JSON,
             convert data, decode tokens, and more.
@@ -86,13 +86,13 @@ export default function HomeContent() {
           </div>
         </div>
 
-        <div className="flex-shrink-0 w-full md:w-[340px] lg:w-[380px] xl:w-[420px] mt-8 md:mt-0">
+        <div className="hidden md:block flex-shrink-0 w-full md:w-[340px] lg:w-[380px] xl:w-[420px]">
           <HeroCode />
         </div>
       </div>
 
       {/* Trust strip */}
-      <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3">
+      <div className="mb-6 sm:mb-8 grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
         {FEATURES.map((f, i) => (
           <div
             key={f.label}
@@ -182,7 +182,7 @@ export default function HomeContent() {
               <div className="w-4 h-[1px] bg-[#525252]" />
               All Tools
             </h2>
-            <span className="text-[11px] text-zinc-600">
+            <span className="text-[11px] text-zinc-600 hidden sm:inline">
               Press <kbd className="inline-flex items-center px-1 py-0.5 text-[9px] font-medium bg-white/[0.04] border border-white/[0.06] rounded mx-0.5">0-9</kbd> for quick access
             </span>
           </div>
@@ -191,7 +191,7 @@ export default function HomeContent() {
       )}
 
       {/* Divider */}
-      <div className="gradient-line my-10" />
+      <div className="gradient-line my-6 sm:my-10" />
 
       {/* Why developers choose RAW */}
       <div ref={whyRef}>
