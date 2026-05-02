@@ -78,6 +78,7 @@ const CATEGORIES: {
       { id: 'placeholder', title: 'Placeholder Image' },
       { id: 'bg-remover', title: 'BG Remover' },
       { id: 'image-compress', title: 'Image Compress' },
+      { id: 'video-compress', title: 'Video Compress' },
     ],
   },
 ];

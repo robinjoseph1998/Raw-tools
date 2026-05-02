@@ -38,6 +38,7 @@ const BgRemoverTool = dynamic(() => import('@/components/tools/BgRemoverTool'), 
 import ImageCompressTool from '@/components/tools/ImageCompressTool';
 import ScreenRecorderTool from '@/components/tools/ScreenRecorderTool';
 import PxConverterTool from '@/components/tools/PxConverterTool';
+const VideoCompressTool = dynamic(() => import('@/components/tools/VideoCompressTool'), { ssr: false });
 
 function renderTool(toolId: ToolId, p: { onStatusChange: (s: import('@/types').StatusState) => void; onToast: (msg: string) => void }) {
   switch (toolId) {
@@ -70,6 +71,7 @@ function renderTool(toolId: ToolId, p: { onStatusChange: (s: import('@/types').S
     case 'image-compress': return <ImageCompressTool {...p} />;
     case 'screen-recorder': return <ScreenRecorderTool {...p} />;
     case 'px-converter': return <PxConverterTool {...p} />;
+    case 'video-compress': return <VideoCompressTool {...p} />;
     default: return null;
   }
 }

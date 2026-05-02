@@ -491,13 +491,29 @@ const CARDS: {
       </svg>
     ),
   },
+  {
+    id: 'video-compress',
+    title: 'Video Compress',
+    desc: 'Compress videos in-browser with FFmpeg WebAssembly',
+    glowClass: 'glass-card--pink',
+    iconHover: 'group-hover:text-violet-400 group-hover:border-violet-500/25',
+    shadowHover: 'hover:shadow-glow-pink',
+    accentColor: 'bg-violet-400',
+    badge: 'New',
+    badgeColor: 'text-violet-400 bg-violet-500/10 border-violet-500/20',
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+      </svg>
+    ),
+  },
 ];
 
 const CATEGORIES = [
   { label: 'Data Transform', accent: 'text-cyan-400/70', start: 0, count: 6, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
   { label: 'Security', accent: 'text-blue-400/70', start: 6, count: 5, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-5' },
   { label: 'Dev Utilities', accent: 'text-purple-400/70', start: 11, count: 7, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7' },
-  { label: 'Generate', accent: 'text-pink-400/70', start: 18, count: 11, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
+  { label: 'Generate', accent: 'text-pink-400/70', start: 18, count: 12, cols: 'grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6' },
 ];
 
 export default function ToolCards({ showShortcuts, featured }: { showShortcuts?: boolean; featured?: ToolId[] }) {

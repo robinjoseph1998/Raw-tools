@@ -57,7 +57,7 @@ export default function HomeContent() {
         <div className="flex-1 min-w-0">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/[0.08] mb-5">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-status-pulse" />
-            <span className="text-[11px] font-bold text-cyan-300 uppercase tracking-wider">29 Tools &middot; 100% Client-Side</span>
+            <span className="text-[11px] font-bold text-cyan-300 uppercase tracking-wider">30 Tools &middot; 100% Client-Side</span>
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-cyan-200 to-purple-200 bg-clip-text text-transparent leading-tight hero-shimmer">
             The Developer Toolkit<br className="hidden sm:block" /> That Just Works
@@ -160,7 +160,7 @@ export default function HomeContent() {
             <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
             </svg>
-            View All 29 Tools
+            View All 30 Tools
             <svg className="h-3.5 w-3.5 bounce-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path d="M19 9l-7 7-7-7" />
             </svg>

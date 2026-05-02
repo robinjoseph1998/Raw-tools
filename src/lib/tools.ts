@@ -34,6 +34,7 @@ export const TOOL_META: Record<ToolId, { title: string; desc: string; accent: st
   'image-compress': { title: 'Image Compress', desc: 'Compress images with adjustable quality, format selection, and before/after size comparison.', accent: 'bg-pink-400' },
   'screen-recorder': { title: 'Screen Recorder', desc: 'Record your screen, window, or browser tab with optional mic audio. Download as WebM.', accent: 'bg-blue-400' },
   'px-converter': { title: 'PX ↔ REM / Tailwind', desc: 'Convert pixels to rem units and Tailwind CSS spacing classes. Configurable base font size.', accent: 'bg-purple-400' },
+  'video-compress': { title: 'Video Compress', desc: 'Compress videos with adjustable quality and resolution. Runs 100% in your browser using FFmpeg WebAssembly.', accent: 'bg-violet-400' },
 };
 
 // ── SEO-friendly URL slugs ──
@@ -67,6 +68,7 @@ export const TOOL_SLUGS: Record<ToolId, string> = {
   'bg-remover': 'background-remover',
   'image-compress': 'image-compressor',
   'px-converter': 'pixel-to-rem-tailwind-converter',
+  'video-compress': 'video-compressor',
 };
 
 // Reverse mapping: slug → ToolId
@@ -105,6 +107,7 @@ export const TOOL_SEO: Record<ToolId, { title: string; description: string }> = 
   'bg-remover': { title: 'Background Remover — Remove Image Background Free', description: 'Remove image backgrounds using AI — runs 100% in your browser with on-device machine learning. No uploads, completely private.' },
   'image-compress': { title: 'Image Compressor — Compress Images Online', description: 'Compress images with adjustable quality control and format selection. Compare before/after file sizes. Free online image compressor.' },
   'px-converter': { title: 'PX to REM & Tailwind Converter', description: 'Convert pixels to rem units and Tailwind CSS spacing classes instantly. Configurable base font size. Free online px to rem converter.' },
+  'video-compress': { title: 'Video Compressor — Compress Videos Online', description: 'Compress videos with adjustable quality and resolution. Runs entirely in your browser using FFmpeg WebAssembly. No uploads, completely private.' },
 };
 
 // Card order matches the 4×3 grid layout (by category rows)
@@ -112,7 +115,7 @@ export const TOOL_ORDER: ToolId[] = [
   'format', 'convert', 'url', 'diff', 'sql', 'json-ts',           // cyan row (6)
   'jwt', 'jwt-encode', 'hash', 'password', 'screen-recorder',      // blue row (5)
   'uuid', 'regex', 'timestamp', 'markdown', 'epoch', 'cron', 'px-converter', // purple row (7)
-  'base64', 'color', 'lorem', 'base64-image', 'image-base64', 'image-convert', 'qr', 'gradient', 'placeholder', 'bg-remover', 'image-compress', // pink row (11)
+  'base64', 'color', 'lorem', 'base64-image', 'image-base64', 'image-convert', 'qr', 'gradient', 'placeholder', 'bg-remover', 'image-compress', 'video-compress', // pink row (12)
 ];
 
 export const POPULAR_TOOLS: ToolId[] = ['format', 'screen-recorder', 'jwt', 'base64', 'image-convert'];
@@ -144,8 +147,9 @@ export const RELATED_TOOLS: Record<ToolId, ToolId[]> = {
   placeholder: ['image-convert', 'gradient', 'color'],
   cron: ['timestamp', 'epoch', 'regex'],
   'bg-remover': ['image-compress', 'image-convert', 'image-base64'],
-  'image-compress': ['bg-remover', 'image-convert', 'screen-recorder'],
-  'screen-recorder': ['image-compress', 'image-convert', 'qr'],
+  'image-compress': ['bg-remover', 'image-convert', 'video-compress'],
+  'video-compress': ['image-compress', 'screen-recorder', 'image-convert'],
+  'screen-recorder': ['video-compress', 'image-convert', 'qr'],
   'px-converter': ['color', 'gradient', 'json-ts'],
 };
 
@@ -153,7 +157,7 @@ export const TOOL_CATEGORY: Record<ToolId, string> = {
   format: 'Data Transform', convert: 'Data Transform', url: 'Data Transform', diff: 'Data Transform', sql: 'Data Transform', 'json-ts': 'Data Transform',
   jwt: 'Security', 'jwt-encode': 'Security', hash: 'Security', password: 'Security', 'screen-recorder': 'Security',
   uuid: 'Dev Utilities', regex: 'Dev Utilities', timestamp: 'Dev Utilities', markdown: 'Dev Utilities', epoch: 'Dev Utilities', cron: 'Dev Utilities', 'px-converter': 'Dev Utilities',
-  base64: 'Generate', color: 'Generate', lorem: 'Generate', 'base64-image': 'Generate', 'image-base64': 'Generate', 'image-convert': 'Generate', qr: 'Generate', gradient: 'Generate', placeholder: 'Generate', 'bg-remover': 'Generate', 'image-compress': 'Generate',
+  base64: 'Generate', color: 'Generate', lorem: 'Generate', 'base64-image': 'Generate', 'image-base64': 'Generate', 'image-convert': 'Generate', qr: 'Generate', gradient: 'Generate', placeholder: 'Generate', 'bg-remover': 'Generate', 'image-compress': 'Generate', 'video-compress': 'Generate',
 };
 
 // ── Keyboard shortcuts ──
@@ -161,7 +165,7 @@ export const LETTER_SHORTCUTS: Record<string, ToolId> = {
   u: 'uuid', r: 'regex', t: 'timestamp', m: 'markdown', d: 'epoch', x: 'cron', y: 'px-converter',
   e: 'base64', c: 'color', l: 'lorem', b: 'base64-image', i: 'image-base64',
   f: 'image-convert', q: 'qr', g: 'gradient', p: 'placeholder',
-  a: 'bg-remover', k: 'image-compress', w: 'screen-recorder',
+  a: 'bg-remover', k: 'image-compress', w: 'screen-recorder', v: 'video-compress',
 };
 
 // ── Content detection for paste/drop ──
@@ -613,6 +617,21 @@ export const TOOL_CONTENT: Record<ToolId, { about: string; steps: string[]; faq:
       { q: 'How much can images be compressed?', a: 'Compression ratios vary by image content and format. JPEG images can often be reduced 50-80% with minimal visible quality loss. WebP typically achieves even better compression than JPEG at the same quality level.' },
       { q: 'Is any quality lost during compression?', a: 'JPEG and WebP use lossy compression, so some quality is lost (controlled by the quality slider). PNG compression is lossless — file size reduction comes from optimizing the encoding, not removing data.' },
       { q: 'Which output format should I choose?', a: 'WebP offers the best compression-to-quality ratio and is supported by all modern browsers. JPEG is universally compatible. PNG is best when you need lossless quality or transparency.' },
+    ],
+  },
+  'video-compress': {
+    about: 'Compress videos directly in your browser with no uploads or server processing. RAW\'s Video Compressor uses FFmpeg WebAssembly to re-encode videos at lower bitrates and resolutions. Choose from quality presets and resolution options to find the right balance between file size and visual quality.',
+    steps: [
+      'Upload a video by dragging and dropping or clicking to browse.',
+      'Choose a quality preset (High, Medium, or Low) and resolution.',
+      'Click Compress and wait for processing to complete.',
+      'Compare the original and compressed file sizes, then download.',
+    ],
+    faq: [
+      { q: 'How does browser-based video compression work?', a: 'The tool uses FFmpeg compiled to WebAssembly (WASM), which runs the same compression algorithms as desktop FFmpeg entirely in your browser. The WASM engine is downloaded once (~31MB) on first use and cached for subsequent compressions.' },
+      { q: 'Is my video uploaded anywhere?', a: 'No. All processing happens locally in your browser. Your video never leaves your device — nothing is uploaded to any server.' },
+      { q: 'What output format is used?', a: 'Videos are compressed to MP4 (H.264 video + AAC audio), which is universally supported across all devices, browsers, and media players.' },
+      { q: 'Why is compression slower than desktop software?', a: 'WebAssembly runs in a sandboxed browser environment without hardware acceleration, so it is slower than native FFmpeg. Compression time depends on video length, resolution, and your device\'s CPU.' },
     ],
   },
   'px-converter': {
