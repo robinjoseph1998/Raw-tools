@@ -140,7 +140,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
       {/* Footer — full width below sidebar + content */}
       <footer>
         <div className="gradient-line--subtle" />
-        <div className="py-4 sm:py-5 bg-[#070b14]">
+        <div className="py-4 sm:py-5 bg-[#0a0a0a]">
           <div className="px-4 sm:px-6 md:px-8">
             <div className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2 text-center sm:text-left">
               <div className="flex items-center gap-3">
@@ -149,7 +149,7 @@ function AppShellInner({ children }: { children: React.ReactNode }) {
                   <span className="text-[11px] font-semibold text-zinc-500">RAW</span>
                 </div>
                 <span className="text-zinc-800">|</span>
-                <span className="text-[10px] sm:text-[11px] text-zinc-600">29 tools &middot; 100% client-side</span>
+                <span className="text-[10px] sm:text-[11px] text-zinc-600">30 tools &middot; 100% client-side</span>
               </div>
               <div className="flex items-center gap-2 text-[10px] sm:text-[11px] text-zinc-600">
                 <span>&copy; {new Date().getFullYear()} RAW</span>

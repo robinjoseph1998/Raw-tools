@@ -71,6 +71,74 @@ export const TOOL_SLUGS: Record<ToolId, string> = {
   'video-compress': 'video-compressor',
 };
 
+// ── Per-tool dot colors (shared by Sidebar + CommandPalette) ──
+export const TOOL_DOT_COLORS: Record<ToolId, string> = {
+  format: 'bg-blue-400',
+  convert: 'bg-emerald-400',
+  url: 'bg-teal-400',
+  diff: 'bg-amber-400',
+  sql: 'bg-indigo-400',
+  'json-ts': 'bg-violet-400',
+  jwt: 'bg-yellow-400',
+  'jwt-encode': 'bg-orange-400',
+  hash: 'bg-green-400',
+  password: 'bg-red-400',
+  'screen-recorder': 'bg-rose-400',
+  uuid: 'bg-purple-400',
+  regex: 'bg-fuchsia-400',
+  timestamp: 'bg-sky-400',
+  markdown: 'bg-emerald-400',
+  epoch: 'bg-cyan-400',
+  cron: 'bg-lime-400',
+  'px-converter': 'bg-pink-400',
+  base64: 'bg-blue-400',
+  color: 'bg-rose-400',
+  lorem: 'bg-amber-400',
+  'base64-image': 'bg-violet-400',
+  'image-base64': 'bg-indigo-400',
+  'image-convert': 'bg-teal-400',
+  qr: 'bg-green-400',
+  gradient: 'bg-fuchsia-400',
+  placeholder: 'bg-orange-400',
+  'bg-remover': 'bg-red-400',
+  'image-compress': 'bg-emerald-400',
+  'video-compress': 'bg-purple-400',
+};
+
+// ── Per-tool text colors (for descriptions/subtexts) ──
+export const TOOL_TEXT_COLORS: Record<ToolId, string> = {
+  format: 'text-blue-400/50',
+  convert: 'text-emerald-400/50',
+  url: 'text-teal-400/50',
+  diff: 'text-amber-400/50',
+  sql: 'text-indigo-400/50',
+  'json-ts': 'text-violet-400/50',
+  jwt: 'text-yellow-400/50',
+  'jwt-encode': 'text-orange-400/50',
+  hash: 'text-green-400/50',
+  password: 'text-red-400/50',
+  'screen-recorder': 'text-rose-400/50',
+  uuid: 'text-purple-400/50',
+  regex: 'text-fuchsia-400/50',
+  timestamp: 'text-sky-400/50',
+  markdown: 'text-emerald-400/50',
+  epoch: 'text-cyan-400/50',
+  cron: 'text-lime-400/50',
+  'px-converter': 'text-pink-400/50',
+  base64: 'text-blue-400/50',
+  color: 'text-rose-400/50',
+  lorem: 'text-amber-400/50',
+  'base64-image': 'text-violet-400/50',
+  'image-base64': 'text-indigo-400/50',
+  'image-convert': 'text-teal-400/50',
+  qr: 'text-green-400/50',
+  gradient: 'text-fuchsia-400/50',
+  placeholder: 'text-orange-400/50',
+  'bg-remover': 'text-red-400/50',
+  'image-compress': 'text-emerald-400/50',
+  'video-compress': 'text-purple-400/50',
+};
+
 // Reverse mapping: slug → ToolId
 export const SLUG_TO_TOOL: Record<string, ToolId> = Object.fromEntries(
   Object.entries(TOOL_SLUGS).map(([id, slug]) => [slug, id as ToolId])
@@ -118,7 +186,7 @@ export const TOOL_ORDER: ToolId[] = [
   'base64', 'color', 'lorem', 'base64-image', 'image-base64', 'image-convert', 'qr', 'gradient', 'placeholder', 'bg-remover', 'image-compress', 'video-compress', // pink row (12)
 ];
 
-export const POPULAR_TOOLS: ToolId[] = ['format', 'screen-recorder', 'jwt', 'base64', 'image-convert'];
+export const POPULAR_TOOLS: ToolId[] = ['format', 'screen-recorder', 'jwt', 'base64', 'image-convert', 'image-compress', 'video-compress'];
 
 export const RELATED_TOOLS: Record<ToolId, ToolId[]> = {
   format: ['convert', 'json-ts', 'screen-recorder'],
@@ -209,16 +277,16 @@ export function detectContent(text: string): { tool: ToolId; label: string } | n
 
 // ── Home page data ──
 export const FEATURES = [
-  { label: '100% Private', detail: 'All processing happens in your browser', accent: 'text-emerald-400' },
-  { label: 'Keyboard First', detail: '\u2318K to search, 0-9 to jump to tools', accent: 'text-cyan-400' },
-  { label: 'Zero Friction', detail: 'No sign-up, no tracking, just tools', accent: 'text-purple-400' },
+  { label: '100% Private', detail: 'All processing happens in your browser', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' },
+  { label: 'Keyboard First', detail: '\u2318K to search, 0-9 to jump to tools', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/20' },
+  { label: 'Zero Friction', detail: 'No sign-up, no tracking, just tools', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
 ];
 
 export const WHY_ITEMS = [
-  { title: 'Paste anything, we figure it out', desc: 'RAW auto-detects what you paste \u2014 JSON, JWT, Base64, URLs, timestamps \u2014 and routes you to the right tool instantly. No menus, no guessing.', accent: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' },
-  { title: 'Your data never leaves your browser', desc: 'Everything runs client-side. Paste API keys, tokens, or sensitive data with confidence. Zero servers, zero tracking, zero risk.', accent: 'text-blue-400 bg-blue-500/10 border-blue-500/20' },
-  { title: '29 tools, zero tab juggling', desc: 'JSON formatter, JWT decoder, regex tester, hash generator, and more. Stop bookmarking dozens of different websites.', accent: 'text-purple-400 bg-purple-500/10 border-purple-500/20' },
-  { title: 'Built for keyboard-first developers', desc: '\u2318K to search, number keys to jump, ESC to go back. Full keyboard navigation means your hands never leave the keyboard.', accent: 'text-pink-400 bg-pink-500/10 border-pink-500/20' },
+  { title: 'Paste anything, we figure it out', desc: 'RAW auto-detects what you paste \u2014 JSON, JWT, Base64, URLs, timestamps \u2014 and routes you to the right tool instantly. No menus, no guessing.', accent: 'text-zinc-400 bg-white/[0.04] border-[#262626]' },
+  { title: 'Your data never leaves your browser', desc: 'Everything runs client-side. Paste API keys, tokens, or sensitive data with confidence. Zero servers, zero tracking, zero risk.', accent: 'text-zinc-400 bg-white/[0.04] border-[#262626]' },
+  { title: '30 tools, zero tab juggling', desc: 'JSON formatter, JWT decoder, regex tester, hash generator, and more. Stop bookmarking dozens of different websites.', accent: 'text-zinc-400 bg-white/[0.04] border-[#262626]' },
+  { title: 'Built for keyboard-first developers', desc: '\u2318K to search, number keys to jump, ESC to go back. Full keyboard navigation means your hands never leave the keyboard.', accent: 'text-zinc-400 bg-white/[0.04] border-[#262626]' },
 ];
 
 // ── SEO content for tool pages ──

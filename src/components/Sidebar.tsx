@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ToolId } from '@/types';
-import { TOOL_SLUGS, SLUG_TO_TOOL } from '@/lib/tools';
+import { TOOL_SLUGS, SLUG_TO_TOOL, TOOL_DOT_COLORS } from '@/lib/tools';
 import Logo from './Logo';
 
 const CATEGORIES: {
@@ -17,10 +17,10 @@ const CATEGORIES: {
 }[] = [
   {
     label: 'Data Transform',
-    accent: 'text-cyan-400/70',
-    activeBg: 'bg-cyan-500/[0.12] border-cyan-500/20 text-cyan-300',
-    dotColor: 'bg-cyan-400',
-    iconColor: 'text-cyan-400',
+    accent: 'text-zinc-500',
+    activeBg: 'bg-white/[0.08] border-white/[0.1] text-zinc-200',
+    dotColor: 'bg-zinc-400',
+    iconColor: 'text-zinc-400',
     tools: [
       { id: 'format', title: 'Format & Validate' },
       { id: 'convert', title: 'Data Converter' },
@@ -32,10 +32,10 @@ const CATEGORIES: {
   },
   {
     label: 'Security',
-    accent: 'text-blue-400/70',
-    activeBg: 'bg-blue-500/[0.12] border-blue-500/20 text-blue-300',
-    dotColor: 'bg-blue-400',
-    iconColor: 'text-blue-400',
+    accent: 'text-zinc-500',
+    activeBg: 'bg-white/[0.08] border-white/[0.1] text-zinc-200',
+    dotColor: 'bg-zinc-400',
+    iconColor: 'text-zinc-400',
     tools: [
       { id: 'jwt', title: 'JWT Decoder' },
       { id: 'jwt-encode', title: 'JWT Encoder' },
@@ -45,10 +45,10 @@ const CATEGORIES: {
   },
   {
     label: 'Dev Utilities',
-    accent: 'text-purple-400/70',
-    activeBg: 'bg-purple-500/[0.12] border-purple-500/20 text-purple-300',
-    dotColor: 'bg-purple-400',
-    iconColor: 'text-purple-400',
+    accent: 'text-zinc-500',
+    activeBg: 'bg-white/[0.08] border-white/[0.1] text-zinc-200',
+    dotColor: 'bg-zinc-400',
+    iconColor: 'text-zinc-400',
     tools: [
       { id: 'uuid', title: 'UUID Generator' },
       { id: 'regex', title: 'Regex Tester' },
@@ -62,10 +62,10 @@ const CATEGORIES: {
   },
   {
     label: 'Generate',
-    accent: 'text-pink-400/70',
-    activeBg: 'bg-pink-500/[0.12] border-pink-500/20 text-pink-300',
-    dotColor: 'bg-pink-400',
-    iconColor: 'text-pink-400',
+    accent: 'text-zinc-500',
+    activeBg: 'bg-white/[0.08] border-white/[0.1] text-zinc-200',
+    dotColor: 'bg-zinc-400',
+    iconColor: 'text-zinc-400',
     tools: [
       { id: 'base64', title: 'Base64' },
       { id: 'color', title: 'Color Picker' },
@@ -168,11 +168,11 @@ export default function Sidebar({
                         onClick={onClose}
                         className={`flex items-center gap-2.5 w-full pl-7 pr-3 py-[7px] rounded-lg text-left transition-all duration-150 border ${
                           isActive
-                            ? `${cat.activeBg} sidebar-active-glow`
+                            ? cat.activeBg
                             : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] border-transparent'
                         }`}
                       >
-                        <div className={`w-1 h-1 rounded-full flex-shrink-0 ${isActive ? cat.dotColor : 'bg-zinc-600'}`} />
+                        <div className={`w-1 h-1 rounded-full flex-shrink-0 ${TOOL_DOT_COLORS[tool.id]} ${isActive ? 'opacity-100' : 'opacity-40'} transition-opacity`} />
                         <span className="text-[12px] font-medium truncate">{tool.title}</span>
                       </Link>
                     );
@@ -185,12 +185,12 @@ export default function Sidebar({
       </div>
 
       {/* Pro Tip at bottom */}
-      <div className="mx-3 mb-3 p-3 rounded-lg bg-gradient-to-br from-cyan-500/[0.06] to-purple-500/[0.06] border border-white/[0.06]">
+      <div className="mx-3 mb-3 p-3 rounded-lg bg-[#141414] border border-[#262626]">
         <div className="flex items-center gap-2 mb-1.5">
-          <svg className="h-3.5 w-3.5 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
-          <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">Pro Tip</span>
+          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Pro Tip</span>
         </div>
         <p className="text-[11px] text-zinc-500 leading-relaxed">
           Press <kbd className="inline-flex items-center px-1 py-0.5 text-[9px] font-medium bg-white/[0.04] border border-white/[0.06] rounded mx-0.5">⌘K</kbd> to
@@ -218,7 +218,7 @@ export default function Sidebar({
             onClick={onClose}
           />
           {/* Slide-out panel */}
-          <aside className="lg:hidden fixed inset-y-0 left-0 z-50 w-[280px] sidebar-slide-in flex flex-col overflow-hidden" style={{ background: '#070b14', height: '100dvh' }}>
+          <aside className="lg:hidden fixed inset-y-0 left-0 z-50 w-[280px] sidebar-slide-in flex flex-col overflow-hidden" style={{ background: '#0a0a0a', height: '100dvh' }}>
             {/* Mobile header */}
             <div className="flex items-center justify-between px-4 h-12 border-b border-white/[0.06]">
               <div className="flex items-center gap-2">

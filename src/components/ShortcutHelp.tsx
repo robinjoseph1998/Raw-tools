@@ -21,7 +21,7 @@ export default function ShortcutHelp({
     <div className="fixed inset-0 z-[200] flex items-center justify-center" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
       <div
-        className="relative w-full max-w-sm mx-4 rounded-xl border border-white/[0.08] bg-[#0c1120]/95 backdrop-blur-xl shadow-2xl shadow-black/50 animate-scale-in overflow-hidden"
+        className="relative w-full max-w-sm mx-4 rounded-xl border border-[#262626] bg-[#141414] shadow-2xl shadow-black/50 animate-scale-in overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-4 py-3 border-b border-white/[0.06]">

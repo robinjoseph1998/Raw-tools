@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
-import { Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+import { Space_Grotesk, JetBrains_Mono, Inter } from 'next/font/google';
 import './globals.css';
 import AppShell from '@/components/AppShell';
 import { SITE_URL } from '@/lib/tools';
@@ -14,6 +14,13 @@ const grotesk = Space_Grotesk({
   display: 'swap',
 });
 
+const inter = Inter({
+  weight: ['300', '400', '500'],
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
 const jetbrains = JetBrains_Mono({
   weight: ['400', '500', '600'],
   subsets: ['latin'],
@@ -24,11 +31,11 @@ const jetbrains = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'RAW — Developer Toolkit | 29 Free Browser-Based Tools',
+    default: 'RAW — Developer Toolkit | 30 Free Browser-Based Tools',
     template: '%s — RAW',
   },
   description:
-    '29 free browser-based developer tools. Format JSON, decode JWT tokens, encode Base64, generate UUIDs, hash text, and more. 100% client-side — no data sent to servers.',
+    '30 free browser-based developer tools. Format JSON, decode JWT tokens, encode Base64, generate UUIDs, hash text, and more. 100% client-side — no data sent to servers.',
   keywords: [
     'developer tools', 'online tools', 'JSON formatter', 'JWT decoder', 'Base64 encoder',
     'UUID generator', 'hash generator', 'regex tester', 'URL encoder', 'data converter',
@@ -47,13 +54,13 @@ export const metadata: Metadata = {
         url: '/og-image.svg',
         width: 1200,
         height: 630,
-        alt: 'RAW — 29 Free Browser-Based Developer Tools',
+        alt: 'RAW — 30 Free Browser-Based Developer Tools',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RAW — 29 Free Browser-Based Developer Tools',
+    title: 'RAW — 30 Free Browser-Based Developer Tools',
     description: 'Format JSON, decode JWT, encode Base64, generate UUIDs, and more. 100% client-side.',
     images: ['/og-image.svg'],
   },
@@ -72,28 +79,22 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark bg-[#070b14]">
+    <html lang="en" className="dark bg-[#0a0a0a]">
       <head>
         <script
           async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5293477479330024"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5303477479330024"
           crossOrigin="anonymous"
         />
       </head>
       <body
-        className={`${grotesk.variable} ${jetbrains.variable} bg-[#070b14] text-zinc-200 font-sans min-h-screen antialiased`}
+        className={`${grotesk.variable} ${inter.variable} ${jetbrains.variable} bg-[#0a0a0a] text-zinc-200 font-sans min-h-screen antialiased`}
       >
         <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
         <Script id="ga-init" strategy="afterInteractive">
           {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
         </Script>
-        {/* Star field layers */}
-        <div className="starfield-1" aria-hidden="true" />
-        <div className="starfield-2" aria-hidden="true" />
-        <div className="starfield-3" aria-hidden="true" />
-
-        {/* Content above stars */}
-        <div className="relative z-10 flex flex-col min-h-screen" style={{ transform: 'translateZ(0)', WebkitBackfaceVisibility: 'hidden' }}>
+        <div className="relative flex flex-col min-h-screen">
           <AppShell>{children}</AppShell>
         </div>
       </body>

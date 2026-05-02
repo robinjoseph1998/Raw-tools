@@ -87,9 +87,9 @@ export default function SmartPasteHero() {
     <div className="mt-1 mb-1">
       <div className={`relative rounded-xl border transition-all duration-300 ${
         detection
-          ? 'border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.08)]'
+          ? 'border-blue-500/30'
           : isFocused
-            ? 'border-white/[0.12] shadow-[0_0_20px_rgba(255,255,255,0.02)]'
+            ? 'border-white/[0.12]'
             : 'border-white/[0.06]'
       } bg-white/[0.02] overflow-hidden`}>
         <textarea
@@ -109,22 +109,22 @@ export default function SmartPasteHero() {
         {detection && (
           <button
             onClick={handleDetectionClick}
-            className="w-full flex items-center gap-3 px-4 py-2.5 border-t border-cyan-500/15 bg-cyan-500/[0.04] hover:bg-cyan-500/[0.08] transition-colors duration-200 group animate-fade-in"
+            className="w-full flex items-center gap-3 px-4 py-2.5 border-t border-blue-500/15 bg-blue-500/[0.04] hover:bg-blue-500/[0.08] transition-colors duration-200 group animate-fade-in"
           >
-            <div className="h-6 w-6 rounded-md bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center flex-shrink-0">
-              <svg className="h-3 w-3 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <div className="h-6 w-6 rounded-md bg-blue-500/10 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
+              <svg className="h-3 w-3 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
             <div className="flex-1 text-left min-w-0">
-              <span className="text-[12px] font-semibold text-cyan-400">{detection.label}</span>
+              <span className="text-[12px] font-semibold text-blue-400">{detection.label}</span>
               <span className="text-[11px] text-zinc-500 ml-2">
                 Open {TOOL_NAMES[detection.tool] || detection.label.replace(' detected', '')}
               </span>
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              <span className="text-[11px] font-medium text-cyan-400/70 group-hover:text-cyan-400 transition-colors">Go</span>
-              <svg className="h-3.5 w-3.5 text-cyan-400/50 group-hover:text-cyan-400 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <span className="text-[11px] font-medium text-blue-400/70 group-hover:text-blue-400 transition-colors">Go</span>
+              <svg className="h-3.5 w-3.5 text-blue-400/50 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </div>

@@ -48,11 +48,11 @@ export default function EditorPanel({
   );
 
   return (
-    <section className="flex flex-col min-h-[420px] lg:min-h-[460px] rounded-xl glass-panel overflow-hidden transition-all duration-300 focus-within:border-cyan-500/30 focus-within:shadow-glow-cyan">
+    <section className="flex flex-col min-h-[420px] lg:min-h-[460px] rounded-xl glass-panel overflow-hidden transition-all duration-300 focus-within:border-[#3a3a3a]">
       {/* Header */}
       <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-white/[0.08] bg-white/[0.03]">
         <div className="flex items-center gap-2.5">
-          <div className={`w-2.5 h-2.5 rounded-full ${mode === 'input' ? 'bg-cyan-400/70' : 'bg-purple-400/70'}`} />
+          <div className={`w-2.5 h-2.5 rounded-full ${mode === 'input' ? 'bg-zinc-400' : 'bg-zinc-500'}`} />
           <span className="text-[12px] font-bold text-zinc-300 select-none uppercase tracking-wider">
             {title}
           </span>

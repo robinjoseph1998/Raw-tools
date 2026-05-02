@@ -5,16 +5,16 @@ import { useState, useEffect } from 'react';
 const CODE_LINES = [
   { text: '{', cls: 'text-zinc-600' },
   { text: '  "name": "RAW"', parts: [
-    { t: '  ', c: '' }, { t: '"name"', c: 'text-cyan-400' }, { t: ': ', c: 'text-zinc-600' }, { t: '"RAW"', c: 'text-purple-300' },
+    { t: '  ', c: '' }, { t: '"name"', c: 'text-blue-300' }, { t: ': ', c: 'text-zinc-600' }, { t: '"RAW"', c: 'text-purple-300' },
   ]},
   { text: '  "tools": 15', parts: [
-    { t: '  ', c: '' }, { t: '"tools"', c: 'text-cyan-400' }, { t: ': ', c: 'text-zinc-600' }, { t: '15', c: 'text-amber-400' },
+    { t: '  ', c: '' }, { t: '"tools"', c: 'text-blue-300' }, { t: ': ', c: 'text-zinc-600' }, { t: '15', c: 'text-amber-400' },
   ]},
   { text: '  "private": true', parts: [
-    { t: '  ', c: '' }, { t: '"private"', c: 'text-cyan-400' }, { t: ': ', c: 'text-zinc-600' }, { t: 'true', c: 'text-pink-300' },
+    { t: '  ', c: '' }, { t: '"private"', c: 'text-blue-300' }, { t: ': ', c: 'text-zinc-600' }, { t: 'true', c: 'text-pink-300' },
   ]},
   { text: '  "server": null', parts: [
-    { t: '  ', c: '' }, { t: '"server"', c: 'text-cyan-400' }, { t: ': ', c: 'text-zinc-600' }, { t: 'null', c: 'text-zinc-500 italic' },
+    { t: '  ', c: '' }, { t: '"server"', c: 'text-blue-300' }, { t: ': ', c: 'text-zinc-600' }, { t: 'null', c: 'text-zinc-500 italic' },
   ]},
   { text: '}', cls: 'text-zinc-600' },
 ];
@@ -68,7 +68,7 @@ export default function HeroCode() {
             </div>
           ))}
           {visibleLines < CODE_LINES.length && (
-            <span className="inline-block w-[7px] h-[15px] bg-cyan-400/70 animate-pulse ml-0.5" />
+            <span className="inline-block w-[7px] h-[15px] bg-blue-400/70 animate-pulse ml-0.5" />
           )}
         </code>
       </pre>

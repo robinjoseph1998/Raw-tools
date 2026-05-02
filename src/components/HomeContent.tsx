@@ -11,9 +11,12 @@ import SmartPasteHero from './SmartPasteHero';
 import HeroCode from './HeroCode';
 
 const FEATURE_ICONS = [
-  <svg key="0" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
-  <svg key="1" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
-  <svg key="2" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
+  // Shield with checkmark — pulses subtly
+  <svg key="0" className="h-4 w-4 animate-[pulse_3s_ease-in-out_infinite]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
+  // Lightning bolt — bounces
+  <svg key="1" className="h-4 w-4 animate-[bounce_2s_ease-in-out_infinite]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
+  // Sparkle — spins slowly
+  <svg key="2" className="h-4 w-4 animate-[spin_6s_linear_infinite]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>,
 ];
 
 const WHY_ICONS = [
@@ -55,12 +58,14 @@ export default function HomeContent() {
       {/* Hero: left text + right code preview */}
       <div className="mb-8 flex flex-col md:flex-row md:items-start md:gap-8 xl:gap-10">
         <div className="flex-1 min-w-0">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/[0.08] mb-5">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-status-pulse" />
-            <span className="text-[11px] font-bold text-cyan-300 uppercase tracking-wider">30 Tools &middot; 100% Client-Side</span>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#333] bg-white/[0.03] mb-5">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-status-pulse" />
+            <span className="text-[11px] font-bold text-[#a1a1a1] uppercase tracking-wider">30 Tools &middot; 100% Client-Side</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-white via-cyan-200 to-purple-200 bg-clip-text text-transparent leading-tight hero-shimmer">
-            The Developer Toolkit<br className="hidden sm:block" /> That Just Works
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 leading-tight">
+            <span className="text-[#fafafa]">The Developer Toolkit</span>
+            <br className="hidden sm:block" />
+            <span className="hero-gradient-text">That Just Works</span>
           </h1>
           <p className="text-sm sm:text-[15px] text-zinc-300/80 max-w-xl leading-[1.8] tracking-wide mb-5" style={{ fontWeight: 400 }}>
             Stop juggling between dozens of browser tabs and random online tools.
@@ -75,13 +80,13 @@ export default function HomeContent() {
               or press <kbd className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium bg-white/[0.04] border border-white/[0.06] rounded mx-0.5">⌘K</kbd> to search
             </span>
             <span className="text-zinc-800">&middot;</span>
-            <button onClick={() => document.getElementById('tools-section')?.scrollIntoView({ behavior: 'smooth' })} className="text-[12px] text-zinc-500 hover:text-cyan-400 transition-colors">
+            <button onClick={() => document.getElementById('tools-section')?.scrollIntoView({ behavior: 'smooth' })} className="text-[12px] text-zinc-500 hover:text-blue-400 transition-colors">
               Browse all tools &darr;
             </button>
           </div>
         </div>
 
-        <div className="flex-shrink-0 w-full md:w-[340px] lg:w-[380px] xl:w-[420px] mt-8 md:mt-0 animate-float">
+        <div className="flex-shrink-0 w-full md:w-[340px] lg:w-[380px] xl:w-[420px] mt-8 md:mt-0">
           <HeroCode />
         </div>
       </div>
@@ -94,7 +99,7 @@ export default function HomeContent() {
             className="flex items-center gap-3 rounded-xl glass-panel px-4 py-3.5 hover:bg-white/[0.04] transition-colors duration-300 stagger-in"
             style={{ animationDelay: `${200 + i * 100}ms` }}
           >
-            <div className={`h-9 w-9 rounded-lg bg-white/[0.06] border border-white/[0.1] flex items-center justify-center ${f.accent} flex-shrink-0`}>
+            <div className={`h-9 w-9 rounded-lg ${f.bg} border flex items-center justify-center ${f.color} flex-shrink-0`}>
               {FEATURE_ICONS[i]}
             </div>
             <div className="min-w-0">
@@ -155,13 +160,14 @@ export default function HomeContent() {
               setShowAllTools(true);
               setTimeout(() => document.getElementById('all-tools-section')?.scrollIntoView({ behavior: 'smooth' }), 50);
             }}
-            className="btn-flow"
+            className="view-all-btn group"
           >
-            <svg className="h-4 w-4 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            <span className="view-all-shimmer" />
+            <svg className="h-4 w-4 text-zinc-500 group-hover:text-blue-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm10.5 0A2.25 2.25 0 0116.5 3.75h2.25A2.25 2.25 0 0121 6v2.25a2.25 2.25 0 01-2.25 2.25H16.5a2.25 2.25 0 01-2.25-2.25V6zM3.75 16.5A2.25 2.25 0 016 14.25h2.25a2.25 2.25 0 012.25 2.25v2.25A2.25 2.25 0 018.25 21H6a2.25 2.25 0 01-2.25-2.25v-2.25zm10.5 0a2.25 2.25 0 012.25-2.25h2.25A2.25 2.25 0 0121 16.5v2.25A2.25 2.25 0 0118.75 21H16.5a2.25 2.25 0 01-2.25-2.25v-2.25z" />
             </svg>
-            View All 30 Tools
-            <svg className="h-3.5 w-3.5 bounce-arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <span className="text-zinc-400 group-hover:text-zinc-100 transition-colors duration-300">View All 30 Tools</span>
+            <svg className="h-3.5 w-3.5 text-zinc-600 group-hover:text-blue-400 bounce-arrow transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path d="M19 9l-7 7-7-7" />
             </svg>
           </button>
@@ -173,7 +179,7 @@ export default function HomeContent() {
         <div id="all-tools-section" className="mb-3 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2.5">
-              <div className="w-4 h-[1px] bg-gradient-to-r from-cyan-500/50 to-transparent" />
+              <div className="w-4 h-[1px] bg-[#525252]" />
               All Tools
             </h2>
             <span className="text-[11px] text-zinc-600">
@@ -190,7 +196,7 @@ export default function HomeContent() {
       {/* Why developers choose RAW */}
       <div ref={whyRef}>
         <h2 className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-6 flex items-center gap-2.5">
-          <div className="w-4 h-[1px] bg-gradient-to-r from-purple-500/50 to-transparent" />
+          <div className="w-4 h-[1px] bg-[#525252]" />
           Why developers choose RAW
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">

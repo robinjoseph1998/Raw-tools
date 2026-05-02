@@ -3,37 +3,39 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ToolId } from '@/types';
-import { TOOL_SLUGS } from '@/lib/tools';
+import { TOOL_SLUGS, TOOL_DOT_COLORS, TOOL_TEXT_COLORS } from '@/lib/tools';
 
 const TOOLS: { id: ToolId; title: string; desc: string; shortcut: string; accent: string }[] = [
-  { id: 'format', title: 'Format & Validate', desc: 'Pretty-print, minify & validate JSON', shortcut: '1', accent: 'text-cyan-400' },
-  { id: 'convert', title: 'Data Converter', desc: 'Convert between JSON, YAML, CSV, XML', shortcut: '2', accent: 'text-cyan-400' },
-  { id: 'url', title: 'URL Encode', desc: 'Encode & decode URL components', shortcut: '3', accent: 'text-cyan-400' },
-  { id: 'diff', title: 'Diff / Compare', desc: 'Compare two texts with line-level diff', shortcut: '4', accent: 'text-cyan-400' },
-  { id: 'sql', title: 'SQL Formatter', desc: 'Format, beautify & minify SQL queries', shortcut: '5', accent: 'text-cyan-400' },
-  { id: 'json-ts', title: 'JSON to TypeScript', desc: 'Generate TypeScript interfaces from JSON', shortcut: '6', accent: 'text-cyan-400' },
-  { id: 'screen-recorder', title: 'Screen Recorder', desc: 'Record screen, window, or tab with audio', shortcut: 'W', accent: 'text-blue-400' },
-  { id: 'jwt', title: 'JWT Decoder', desc: 'Decode tokens & inspect payloads', shortcut: '7', accent: 'text-blue-400' },
-  { id: 'jwt-encode', title: 'JWT Encoder', desc: 'Build & sign JWT tokens', shortcut: '8', accent: 'text-blue-400' },
-  { id: 'hash', title: 'Hash Generator', desc: 'MD5, SHA-1, SHA-256, SHA-512', shortcut: '9', accent: 'text-blue-400' },
-  { id: 'password', title: 'Password Generator', desc: 'Crypto-secure passwords with strength meter', shortcut: '0', accent: 'text-blue-400' },
-  { id: 'uuid', title: 'UUID Generator', desc: 'Generate random UUID v4 identifiers', shortcut: 'U', accent: 'text-purple-400' },
-  { id: 'regex', title: 'Regex Tester', desc: 'Test patterns with live highlighting', shortcut: 'R', accent: 'text-purple-400' },
-  { id: 'timestamp', title: 'Timestamp', desc: 'Unix timestamp ↔ date converter', shortcut: 'T', accent: 'text-purple-400' },
-  { id: 'markdown', title: 'Markdown Preview', desc: 'Live markdown editor with rendered preview', shortcut: 'M', accent: 'text-purple-400' },
-  { id: 'epoch', title: 'Epoch Converter', desc: 'Batch epoch ↔ date with relative time', shortcut: 'D', accent: 'text-purple-400' },
-  { id: 'base64', title: 'Base64', desc: 'Encode & decode with Unicode support', shortcut: 'E', accent: 'text-pink-400' },
-  { id: 'color', title: 'Color Picker', desc: 'Drag to pick & copy HEX, RGB, HSL', shortcut: 'C', accent: 'text-pink-400' },
-  { id: 'lorem', title: 'Lorem Ipsum', desc: 'Generate placeholder text', shortcut: 'L', accent: 'text-pink-400' },
-  { id: 'base64-image', title: 'Base64 to Image', desc: 'Decode Base64 to preview & download images', shortcut: 'B', accent: 'text-pink-400' },
-  { id: 'image-base64', title: 'Image to Base64', desc: 'Upload images & convert to Base64 data URI', shortcut: 'I', accent: 'text-pink-400' },
-  { id: 'image-convert', title: 'Image Converter', desc: 'PNG, JPEG, WebP, AVIF, BMP, TIFF & ICO conversion', shortcut: 'F', accent: 'text-pink-400' },
-  { id: 'qr', title: 'QR Code', desc: 'Generate & read QR codes', shortcut: 'Q', accent: 'text-pink-400' },
-  { id: 'gradient', title: 'CSS Gradient', desc: 'Build & preview CSS gradients with presets', shortcut: 'G', accent: 'text-pink-400' },
-  { id: 'placeholder', title: 'Placeholder Image', desc: 'Generate placeholder images with custom size & color', shortcut: 'P', accent: 'text-pink-400' },
-  { id: 'cron', title: 'Cron Builder', desc: 'Build & parse cron expressions visually', shortcut: 'X', accent: 'text-purple-400' },
-  { id: 'bg-remover', title: 'BG Remover', desc: 'Remove image backgrounds with AI in-browser', shortcut: 'A', accent: 'text-pink-400' },
-  { id: 'image-compress', title: 'Image Compress', desc: 'Compress images with quality control & size comparison', shortcut: 'K', accent: 'text-pink-400' },
+  { id: 'format', title: 'Format & Validate', desc: 'Pretty-print, minify & validate JSON', shortcut: '1', accent: 'text-zinc-400' },
+  { id: 'convert', title: 'Data Converter', desc: 'Convert between JSON, YAML, CSV, XML', shortcut: '2', accent: 'text-zinc-400' },
+  { id: 'url', title: 'URL Encode', desc: 'Encode & decode URL components', shortcut: '3', accent: 'text-zinc-400' },
+  { id: 'diff', title: 'Diff / Compare', desc: 'Compare two texts with line-level diff', shortcut: '4', accent: 'text-zinc-400' },
+  { id: 'sql', title: 'SQL Formatter', desc: 'Format, beautify & minify SQL queries', shortcut: '5', accent: 'text-zinc-400' },
+  { id: 'json-ts', title: 'JSON to TypeScript', desc: 'Generate TypeScript interfaces from JSON', shortcut: '6', accent: 'text-zinc-400' },
+  { id: 'screen-recorder', title: 'Screen Recorder', desc: 'Record screen, window, or tab with audio', shortcut: 'W', accent: 'text-zinc-400' },
+  { id: 'jwt', title: 'JWT Decoder', desc: 'Decode tokens & inspect payloads', shortcut: '7', accent: 'text-zinc-400' },
+  { id: 'jwt-encode', title: 'JWT Encoder', desc: 'Build & sign JWT tokens', shortcut: '8', accent: 'text-zinc-400' },
+  { id: 'hash', title: 'Hash Generator', desc: 'MD5, SHA-1, SHA-256, SHA-512', shortcut: '9', accent: 'text-zinc-400' },
+  { id: 'password', title: 'Password Generator', desc: 'Crypto-secure passwords with strength meter', shortcut: '0', accent: 'text-zinc-400' },
+  { id: 'uuid', title: 'UUID Generator', desc: 'Generate random UUID v4 identifiers', shortcut: 'U', accent: 'text-zinc-400' },
+  { id: 'regex', title: 'Regex Tester', desc: 'Test patterns with live highlighting', shortcut: 'R', accent: 'text-zinc-400' },
+  { id: 'timestamp', title: 'Timestamp', desc: 'Unix timestamp ↔ date converter', shortcut: 'T', accent: 'text-zinc-400' },
+  { id: 'markdown', title: 'Markdown Preview', desc: 'Live markdown editor with rendered preview', shortcut: 'M', accent: 'text-zinc-400' },
+  { id: 'epoch', title: 'Epoch Converter', desc: 'Batch epoch ↔ date with relative time', shortcut: 'D', accent: 'text-zinc-400' },
+  { id: 'base64', title: 'Base64', desc: 'Encode & decode with Unicode support', shortcut: 'E', accent: 'text-zinc-400' },
+  { id: 'color', title: 'Color Picker', desc: 'Drag to pick & copy HEX, RGB, HSL', shortcut: 'C', accent: 'text-zinc-400' },
+  { id: 'lorem', title: 'Lorem Ipsum', desc: 'Generate placeholder text', shortcut: 'L', accent: 'text-zinc-400' },
+  { id: 'base64-image', title: 'Base64 to Image', desc: 'Decode Base64 to preview & download images', shortcut: 'B', accent: 'text-zinc-400' },
+  { id: 'image-base64', title: 'Image to Base64', desc: 'Upload images & convert to Base64 data URI', shortcut: 'I', accent: 'text-zinc-400' },
+  { id: 'image-convert', title: 'Image Converter', desc: 'PNG, JPEG, WebP, AVIF, BMP, TIFF & ICO conversion', shortcut: 'F', accent: 'text-zinc-400' },
+  { id: 'qr', title: 'QR Code', desc: 'Generate & read QR codes', shortcut: 'Q', accent: 'text-zinc-400' },
+  { id: 'gradient', title: 'CSS Gradient', desc: 'Build & preview CSS gradients with presets', shortcut: 'G', accent: 'text-zinc-400' },
+  { id: 'placeholder', title: 'Placeholder Image', desc: 'Generate placeholder images with custom size & color', shortcut: 'P', accent: 'text-zinc-400' },
+  { id: 'cron', title: 'Cron Builder', desc: 'Build & parse cron expressions visually', shortcut: 'X', accent: 'text-zinc-400' },
+  { id: 'bg-remover', title: 'BG Remover', desc: 'Remove image backgrounds with AI in-browser', shortcut: 'A', accent: 'text-zinc-400' },
+  { id: 'image-compress', title: 'Image Compress', desc: 'Compress images with quality control & size comparison', shortcut: 'K', accent: 'text-zinc-400' },
+  { id: 'px-converter', title: 'PX ↔ REM', desc: 'Convert pixels to rem & Tailwind spacing', shortcut: 'V', accent: 'text-zinc-400' },
+  { id: 'video-compress', title: 'Video Compress', desc: 'Compress videos with FFmpeg in browser', shortcut: 'Z', accent: 'text-zinc-400' },
 ];
 
 function fuzzyMatch(text: string, query: string): boolean {
@@ -108,7 +110,7 @@ export default function CommandPalette({
 
       {/* Modal */}
       <div
-        className="relative w-full max-w-lg mx-4 rounded-xl border border-white/[0.08] bg-[#0c1120]/95 backdrop-blur-xl shadow-2xl shadow-black/50 animate-scale-in overflow-hidden"
+        className="relative w-full max-w-lg mx-4 rounded-xl border border-[#262626] bg-[#141414] shadow-2xl shadow-black/50 animate-scale-in overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search input */}
@@ -147,12 +149,13 @@ export default function CommandPalette({
                 onClick={() => selectTool(tool.id)}
                 onMouseEnter={() => setActiveIndex(i)}
               >
+                <div className={`w-1 h-1 rounded-full flex-shrink-0 ${TOOL_DOT_COLORS[tool.id]} ${i === activeIndex ? 'opacity-100' : 'opacity-50'} transition-opacity`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className={`text-[13px] font-semibold ${i === activeIndex ? 'text-zinc-100' : 'text-zinc-300'}`}>
                       {tool.title}
                     </span>
-                    <span className={`text-[10px] ${tool.accent} opacity-60`}>{tool.desc}</span>
+                    <span className={`text-[10px] ${TOOL_TEXT_COLORS[tool.id]}`}>{tool.desc}</span>
                   </div>
                 </div>
                 {tool.shortcut && (
