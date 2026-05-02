@@ -12,16 +12,15 @@ export default function Logo({ size = 28, className = '' }: { size?: number; cla
     >
       <defs>
         <linearGradient id="logo-grad-frame" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#818cf8" />
-          <stop offset="50%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#22d3ee" />
+          <stop offset="0%" stopColor="#525252" />
+          <stop offset="100%" stopColor="#3b82f6" />
         </linearGradient>
         <linearGradient id="logo-grad-brace" x1="0" y1="16" x2="64" y2="48" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="100%" stopColor="#22d3ee" />
+          <stop offset="0%" stopColor="#a1a1aa" />
+          <stop offset="100%" stopColor="#3b82f6" />
         </linearGradient>
         <linearGradient id="logo-grad-prompt" x1="24" y1="22" x2="44" y2="42" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#e0e7ff" />
+          <stop offset="0%" stopColor="#e4e4e7" />
           <stop offset="100%" stopColor="#ffffff" />
         </linearGradient>
       </defs>
