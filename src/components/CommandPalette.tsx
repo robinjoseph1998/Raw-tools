@@ -59,24 +59,39 @@ export default function CommandPalette({
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   const filtered = query.trim()
     ? TOOLS.filter((t) => fuzzyMatch(t.title + ' ' + t.desc, query))
     : TOOLS;
 
-  // Reset on open/close
+  // Reset on open/close & lock body scroll
   useEffect(() => {
     if (open) {
       setQuery('');
       setActiveIndex(0);
+      document.body.style.overflow = 'hidden';
       requestAnimationFrame(() => inputRef.current?.focus());
+    } else {
+      document.body.style.overflow = '';
     }
+    return () => { document.body.style.overflow = ''; };
   }, [open]);
 
   // Keep activeIndex in bounds
   useEffect(() => {
     if (activeIndex >= filtered.length) setActiveIndex(Math.max(0, filtered.length - 1));
   }, [filtered.length, activeIndex]);
+
+  // Scroll active item into view
+  useEffect(() => {
+    const container = listRef.current;
+    if (!container) return;
+    const activeEl = container.children[activeIndex] as HTMLElement | undefined;
+    if (activeEl) {
+      activeEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }, [activeIndex]);
 
   const selectTool = useCallback((toolId: ToolId) => {
     router.push(`/tools/${TOOL_SLUGS[toolId]}`);
@@ -134,7 +149,7 @@ export default function CommandPalette({
         </div>
 
         {/* Results */}
-        <div className="max-h-[60vh] sm:max-h-[320px] overflow-y-auto py-2">
+        <div ref={listRef} className="max-h-[60vh] sm:max-h-[320px] overflow-y-auto scroll-smooth py-2">
           {filtered.length === 0 ? (
             <div className="px-4 py-8 text-center">
               <p className="text-[13px] text-zinc-500">No tools found</p>
