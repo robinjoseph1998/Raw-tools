@@ -16,6 +16,8 @@ function formatBytes(n: number): string {
   return (n / 1048576).toFixed(2) + ' MB';
 }
 
+type FrameRate = 30 | 60;
+
 export default function ScreenRecorderTool({
   onStatusChange,
   onToast,
@@ -31,6 +33,7 @@ export default function ScreenRecorderTool({
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [micEnabled, setMicEnabled] = useState(false);
+  const [frameRate, setFrameRate] = useState<FrameRate>(30);
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [duration, setDuration] = useState(0);
@@ -67,10 +70,10 @@ export default function ScreenRecorderTool({
 
   const startRecording = useCallback(async () => {
     try {
-      // Get screen stream
+      // Get screen stream with frame rate
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: true, // request system audio (tab audio in Chrome)
+        video: { frameRate: { ideal: frameRate } },
+        audio: true,
       });
 
       streamRef.current = screenStream;
@@ -190,7 +193,7 @@ export default function ScreenRecorderTool({
         onStatusChange('invalid');
       }
     }
-  }, [micEnabled, previewUrl, cleanup, onStatusChange, onToast]);
+  }, [frameRate, micEnabled, previewUrl, cleanup, onStatusChange, onToast]);
 
   const pauseRecording = useCallback(() => {
     if (recorderRef.current && recorderRef.current.state === 'recording') {
@@ -325,8 +328,23 @@ export default function ScreenRecorderTool({
           </button>
         )}
 
-        {/* Mic toggle */}
+        {/* FPS & Mic toggles */}
         <div className="ml-auto flex items-center gap-2">
+          {/* FPS toggle */}
+          {([30, 60] as FrameRate[]).map((fps) => (
+            <button
+              key={fps}
+              onClick={() => setFrameRate(fps)}
+              disabled={isRecording}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-all duration-200 ${
+                frameRate === fps
+                  ? 'bg-purple-500/15 border-purple-500/30 text-purple-300'
+                  : 'bg-white/[0.03] border-white/[0.08] text-zinc-500 hover:text-zinc-300 hover:border-white/[0.12]'
+              } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {fps}fps
+            </button>
+          ))}
           <button
             onClick={() => setMicEnabled(v => !v)}
             disabled={isRecording}
