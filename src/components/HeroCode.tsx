@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const CODE_LINES = [
   { text: '{', cls: 'text-zinc-600' },
@@ -19,27 +19,108 @@ const CODE_LINES = [
   { text: '}', cls: 'text-zinc-600' },
 ];
 
+// Sparkle shapes for the anime burst
+const SPARKLE_SHAPES = [
+  // 4-point star
+  'M8 0L9.5 6.5L16 8L9.5 9.5L8 16L6.5 9.5L0 8L6.5 6.5Z',
+  // Diamond
+  'M6 0L12 6L6 12L0 6Z',
+  // Small 4-point star
+  'M5 0L6.2 3.8L10 5L6.2 6.2L5 10L3.8 6.2L0 5L3.8 3.8Z',
+];
+
+function SparkleEffect() {
+  const sparkles = useMemo(() => {
+    const items = [];
+    for (let i = 0; i < 12; i++) {
+      const angle = (i / 12) * 360;
+      const distance = 30 + Math.random() * 60;
+      const size = 6 + Math.random() * 10;
+      const delay = Math.random() * 0.3;
+      const dx = Math.cos((angle * Math.PI) / 180) * distance;
+      const dy = Math.sin((angle * Math.PI) / 180) * distance;
+      const shape = SPARKLE_SHAPES[i % 3];
+      const colors = ['#34d399', '#60a5fa', '#a78bfa', '#fbbf24', '#f472b6', '#22d3ee'];
+      items.push({ dx, dy, size, delay, shape, color: colors[i % colors.length], rotation: angle });
+    }
+    return items;
+  }, []);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {/* Central flash */}
+      <div className="sparkle-flash absolute left-1/4 bottom-2" />
+
+      {/* Sparkle particles */}
+      {sparkles.map((s, i) => (
+        <svg
+          key={i}
+          className="sparkle-particle absolute"
+          style={{
+            left: '25%',
+            bottom: 8,
+            width: s.size,
+            height: s.size,
+            '--dx': `${s.dx}px`,
+            '--dy': `${s.dy}px`,
+            '--rot': `${s.rotation}deg`,
+            animationDelay: `${s.delay}s`,
+          } as React.CSSProperties}
+          viewBox="0 0 16 16"
+          fill={s.color}
+        >
+          <path d={s.shape} />
+        </svg>
+      ))}
+
+      {/* Anime speed lines radiating from center */}
+      {[...Array(8)].map((_, i) => {
+        const angle = (i / 8) * 360;
+        return (
+          <div
+            key={`line-${i}`}
+            className="sparkle-line absolute"
+            style={{
+              left: '25%',
+              bottom: 8,
+              width: 2,
+              height: 20 + Math.random() * 15,
+              transformOrigin: 'bottom center',
+              transform: `rotate(${angle}deg)`,
+              animationDelay: `${i * 0.04}s`,
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 export default function HeroCode() {
   const [visibleLines, setVisibleLines] = useState(0);
   const [showStatus, setShowStatus] = useState(false);
+  const [showSparkles, setShowSparkles] = useState(false);
 
   useEffect(() => {
     if (visibleLines < CODE_LINES.length) {
       const timer = setTimeout(() => setVisibleLines((v) => v + 1), 120);
       return () => clearTimeout(timer);
     } else {
-      const showTimer = setTimeout(() => setShowStatus(true), 300);
-      // Reset after 5 seconds to replay
+      const showTimer = setTimeout(() => {
+        setShowStatus(true);
+        setShowSparkles(true);
+      }, 300);
+      const hideSparklesTimer = setTimeout(() => setShowSparkles(false), 1800);
       const resetTimer = setTimeout(() => {
         setVisibleLines(0);
         setShowStatus(false);
-      }, 5000);
-      return () => { clearTimeout(showTimer); clearTimeout(resetTimer); };
+      }, 6000);
+      return () => { clearTimeout(showTimer); clearTimeout(hideSparklesTimer); clearTimeout(resetTimer); };
     }
   }, [visibleLines]);
 
   return (
-    <div className="rounded-xl glass-panel overflow-hidden border border-white/[0.06]">
+    <div className="relative rounded-xl glass-panel overflow-hidden border border-white/[0.06]">
       {/* Title bar */}
       <div className="flex items-center gap-2 px-3 py-2 border-b border-white/[0.06]">
         <div className="flex gap-1.5">
@@ -74,13 +155,16 @@ export default function HeroCode() {
       </pre>
 
       {/* Status bar */}
-      <div className={`flex items-center justify-between px-3 py-1.5 border-t border-white/[0.06] bg-white/[0.01] transition-opacity duration-300 ${showStatus ? 'opacity-100' : 'opacity-0'}`}>
-        <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+      <div className={`relative flex items-center justify-between px-3 py-1.5 border-t border-white/[0.06] bg-white/[0.01] transition-opacity duration-300 ${showStatus ? 'opacity-100' : 'opacity-0'}`}>
+        <span className={`flex items-center gap-1.5 text-[10px] text-emerald-400 font-medium ${showStatus ? 'sparkle-text-glow' : ''}`}>
+          <span className={`w-1.5 h-1.5 rounded-full bg-emerald-400 ${showStatus ? 'sparkle-dot-pop' : ''}`} />
           Valid JSON
         </span>
         <span className="text-[10px] text-zinc-600">5 lines &middot; 89 bytes</span>
       </div>
+
+      {/* Anime sparkle burst effect */}
+      {showSparkles && <SparkleEffect />}
     </div>
   );
 }

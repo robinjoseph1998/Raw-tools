@@ -457,8 +457,61 @@ input[type="number"].no-spinner { -moz-appearance: textfield; }
   animation: revealUp 0.6s ease-out forwards;
 }
 
+/* ── Anime sparkle burst ── */
+@keyframes sparkleParticle {
+  0% { transform: translate(0, 0) scale(0) rotate(0deg); opacity: 1; }
+  30% { transform: translate(calc(var(--dx) * 0.5), calc(var(--dy) * 0.5)) scale(1.2) rotate(calc(var(--rot) + 90deg)); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0) rotate(calc(var(--rot) + 180deg)); opacity: 0; }
+}
+@keyframes sparkleFlash {
+  0% { transform: scale(0); opacity: 0.8; }
+  50% { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+@keyframes sparkleLine {
+  0% { transform: rotate(var(--rot, 0deg)) scaleY(0); opacity: 0.6; }
+  40% { transform: rotate(var(--rot, 0deg)) scaleY(1); opacity: 0.4; }
+  100% { transform: rotate(var(--rot, 0deg)) scaleY(0); opacity: 0; }
+}
+@keyframes sparkleTextGlow {
+  0% { text-shadow: 0 0 0 transparent; }
+  30% { text-shadow: 0 0 8px rgba(52, 211, 153, 0.6), 0 0 16px rgba(52, 211, 153, 0.3); }
+  100% { text-shadow: 0 0 0 transparent; }
+}
+@keyframes sparkleDotPop {
+  0% { transform: scale(1); }
+  30% { transform: scale(2.5); }
+  60% { transform: scale(0.8); }
+  100% { transform: scale(1); }
+}
+
+.sparkle-particle {
+  animation: sparkleParticle 0.9s ease-out forwards;
+}
+.sparkle-flash {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.4) 0%, transparent 70%);
+  transform: translate(-50%, 50%);
+  animation: sparkleFlash 0.6s ease-out forwards;
+}
+.sparkle-line {
+  background: linear-gradient(to top, rgba(52, 211, 153, 0.3), transparent);
+  border-radius: 1px;
+  animation: sparkleLine 0.5s ease-out forwards;
+}
+.sparkle-text-glow {
+  animation: sparkleTextGlow 1.2s ease-out;
+}
+.sparkle-dot-pop {
+  animation: sparkleDotPop 0.5s ease-out;
+}
+
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   .stagger-in { animation: none !important; opacity: 1 !important; }
   .reveal-up { animation: none !important; opacity: 1 !important; }
+  .sparkle-particle, .sparkle-flash, .sparkle-line { animation: none !important; opacity: 0 !important; }
+  .sparkle-text-glow, .sparkle-dot-pop { animation: none !important; }
 }

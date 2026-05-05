@@ -151,10 +151,10 @@ export default function CommandPalette({
               >
                 <div className={`w-1 h-1 rounded-full flex-shrink-0 ${TOOL_DOT_COLORS[tool.id]} ${i === activeIndex ? 'opacity-100' : 'opacity-50'} transition-opacity`} />
                 <div className="flex-1 min-w-0">
-                  <span className={`text-[13px] font-semibold ${i === activeIndex ? 'text-zinc-100' : 'text-zinc-300'}`}>
+                  <div className={`text-[13px] font-semibold ${i === activeIndex ? 'text-zinc-100' : 'text-zinc-300'}`}>
                     {tool.title}
-                  </span>
-                  <span className={`hidden sm:inline text-[10px] ml-2 ${TOOL_TEXT_COLORS[tool.id]}`}>{tool.desc}</span>
+                  </div>
+                  <div className={`text-[10px] truncate ${TOOL_TEXT_COLORS[tool.id]}`}>{tool.desc}</div>
                 </div>
                 {tool.shortcut && (
                   <kbd className="hidden sm:inline-flex flex-shrink-0 items-center justify-center w-5 h-5 text-[10px] font-bold text-zinc-600 bg-white/[0.04] border border-white/[0.08] rounded">

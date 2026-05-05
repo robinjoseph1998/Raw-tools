@@ -213,6 +213,9 @@ export default function HomeContent() {
           ))}
         </div>
       </div>
+
+      {/* spacing before footer */}
+      <div className="h-6" />
     </div>
   );
 }
