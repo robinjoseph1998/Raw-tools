@@ -83,6 +83,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           async
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`,
+          }}
+        />
+        <script
+          async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5303477479330024"
           crossOrigin="anonymous"
         />
@@ -90,10 +99,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${grotesk.variable} ${inter.variable} ${jetbrains.variable} bg-[#0a0a0a] text-zinc-200 font-sans min-h-screen antialiased`}
       >
-        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
-        <Script id="ga-init" strategy="afterInteractive">
-          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
-        </Script>
         <div className="relative flex flex-col min-h-screen">
           <AppShell>{children}</AppShell>
         </div>
