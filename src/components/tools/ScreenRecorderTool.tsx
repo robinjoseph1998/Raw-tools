@@ -17,6 +17,32 @@ function formatBytes(n: number): string {
 }
 
 type FrameRate = 30 | 60;
+type OutputFormat = 'webm' | 'mp4';
+
+// 'video/webm;codecs=vp9,opus' -> 'video/webm'
+function baseType(mime: string): string {
+  return mime.split(';')[0].trim();
+}
+
+const MP4_CANDIDATES = [
+  'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+  'video/mp4;codecs=avc1,mp4a.40.2',
+  'video/mp4;codecs=h264,aac',
+  'video/mp4',
+];
+
+const WEBM_CANDIDATES = [
+  'video/webm;codecs=vp9,opus',
+  'video/webm;codecs=vp8,opus',
+  'video/webm',
+];
+
+// First candidate the browser can actually record, or '' if none
+function pickMimeType(format: OutputFormat): string {
+  if (typeof MediaRecorder === 'undefined') return '';
+  const candidates = format === 'mp4' ? MP4_CANDIDATES : WEBM_CANDIDATES;
+  return candidates.find(t => MediaRecorder.isTypeSupported(t)) ?? '';
+}
 
 export default function ScreenRecorderTool({
   onStatusChange,
@@ -30,15 +56,25 @@ export default function ScreenRecorderTool({
     return !navigator.mediaDevices?.getDisplayMedia;
   }, []);
 
+  // Chrome 126+ and Safari can record MP4 directly — no transcode needed
+  const nativeMp4 = useMemo(() => pickMimeType('mp4') !== '', []);
+
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [micEnabled, setMicEnabled] = useState(false);
   const [frameRate, setFrameRate] = useState<FrameRate>(30);
+  const [recordFormat, setRecordFormat] = useState<OutputFormat>('webm');
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [recordedMime, setRecordedMime] = useState('');
   const [previewUrl, setPreviewUrl] = useState('');
   const [duration, setDuration] = useState(0);
   const [fileSize, setFileSize] = useState(0);
   const [resolution, setResolution] = useState<{ w: number; h: number } | null>(null);
+
+  // Transcode state (only used when the requested format wasn't recorded natively)
+  const [converting, setConverting] = useState(false);
+  const [convertProgress, setConvertProgress] = useState(0);
+  const [ffmpegLoading, setFfmpegLoading] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const playbackRef = useRef<HTMLVideoElement>(null);
@@ -48,6 +84,16 @@ export default function ScreenRecorderTool({
   const chunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const ffmpegRef = useRef<import('@ffmpeg/ffmpeg').FFmpeg | null>(null);
+  // Converted output is cached so re-downloading the same format is instant
+  const convertedRef = useRef<{ format: OutputFormat; blob: Blob } | null>(null);
+  const recordedFpsRef = useRef<FrameRate>(30);
+
+  const recordedFormat: OutputFormat = baseType(recordedMime) === 'video/mp4' ? 'mp4' : 'webm';
+  // What will actually be recorded — MP4 falls back to WebM without native support
+  const plannedFormat: OutputFormat = nativeMp4 ? recordFormat : 'webm';
+  const activeFormat = recordedBlob ? recordedFormat : plannedFormat;
+  const formatLabel = activeFormat === 'mp4' ? 'MP4 (H.264)' : 'WebM (VP9)';
 
   // Cleanup all streams and timers
   const cleanup = useCallback(() => {
@@ -123,12 +169,8 @@ export default function ScreenRecorderTool({
         videoRef.current.play().catch(() => {});
       }
 
-      // Setup MediaRecorder
-      const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')
-        ? 'video/webm;codecs=vp9,opus'
-        : MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')
-          ? 'video/webm;codecs=vp8,opus'
-          : 'video/webm';
+      // Setup MediaRecorder — fall back to WebM if MP4 recording isn't supported
+      const mimeType = pickMimeType(recordFormat) || pickMimeType('webm') || 'video/webm';
 
       const recorder = new MediaRecorder(recordStream, { mimeType });
       recorderRef.current = recorder;
@@ -143,6 +185,7 @@ export default function ScreenRecorderTool({
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         const url = URL.createObjectURL(blob);
         setRecordedBlob(blob);
+        setRecordedMime(mimeType);
         setPreviewUrl(url);
         setFileSize(blob.size);
         setIsRecording(false);
@@ -171,12 +214,17 @@ export default function ScreenRecorderTool({
       };
 
       recorder.start(1000); // collect data every second
+      recordedFpsRef.current = frameRate;
+      convertedRef.current = null;
       setIsRecording(true);
       setIsPaused(false);
       setRecordedBlob(null);
+      setRecordedMime('');
       setPreviewUrl('');
       setDuration(0);
       setFileSize(0);
+      setConverting(false);
+      setConvertProgress(0);
       onStatusChange('idle');
 
       // Start timer
@@ -193,7 +241,7 @@ export default function ScreenRecorderTool({
         onStatusChange('invalid');
       }
     }
-  }, [frameRate, micEnabled, previewUrl, cleanup, onStatusChange, onToast]);
+  }, [frameRate, recordFormat, micEnabled, previewUrl, cleanup, onStatusChange, onToast]);
 
   const pauseRecording = useCallback(() => {
     if (recorderRef.current && recorderRef.current.state === 'recording') {
@@ -221,29 +269,140 @@ export default function ScreenRecorderTool({
     }
   }, []);
 
-  const download = useCallback(() => {
-    if (!recordedBlob) return;
-    const url = URL.createObjectURL(recordedBlob);
+  const loadFFmpeg = useCallback(async () => {
+    if (ffmpegRef.current) return ffmpegRef.current;
+
+    setFfmpegLoading(true);
+    try {
+      const { FFmpeg } = await import('@ffmpeg/ffmpeg');
+      const { toBlobURL } = await import('@ffmpeg/util');
+
+      const ffmpeg = new FFmpeg();
+
+      const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+      await ffmpeg.load({
+        coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+        wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+      });
+
+      ffmpegRef.current = ffmpeg;
+      return ffmpeg;
+    } finally {
+      setFfmpegLoading(false);
+    }
+  }, []);
+
+  // Transcode the recording into `target` with ffmpeg.wasm
+  const convertTo = useCallback(async (target: OutputFormat): Promise<Blob | null> => {
+    if (!recordedBlob) return null;
+    setConverting(true);
+    setConvertProgress(0);
+
+    const inputName = `recording.${recordedFormat}`;
+    const outputName = `output.${target}`;
+
+    try {
+      const ffmpeg = await loadFFmpeg();
+      const { fetchFile } = await import('@ffmpeg/util');
+
+      ffmpeg.on('progress', ({ progress: p }) => {
+        setConvertProgress(Math.max(0, Math.min(100, Math.round(p * 100))));
+      });
+
+      await ffmpeg.writeFile(inputName, await fetchFile(recordedBlob));
+
+      // MediaRecorder output is variable frame rate with no duration header,
+      // so regenerate timestamps and pin the output to the recorded frame rate.
+      const args = ['-fflags', '+genpts', '-i', inputName, '-r', String(recordedFpsRef.current)];
+
+      if (target === 'mp4') {
+        args.push(
+          '-c:v', 'libx264',
+          '-preset', 'veryfast',
+          '-crf', '23',
+          '-pix_fmt', 'yuv420p',
+          '-c:a', 'aac',
+          '-b:a', '128k',
+          '-movflags', '+faststart',
+        );
+      } else {
+        args.push('-c:v', 'libvpx-vp9', '-crf', '32', '-b:v', '0', '-c:a', 'libopus');
+      }
+
+      args.push(outputName);
+      await ffmpeg.exec(args);
+
+      const data = await ffmpeg.readFile(outputName);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const blob = new Blob([data as any], { type: `video/${target}` });
+
+      await ffmpeg.deleteFile(inputName).catch(() => {});
+      await ffmpeg.deleteFile(outputName).catch(() => {});
+
+      if (blob.size === 0) throw new Error('Conversion produced an empty file');
+
+      convertedRef.current = { format: target, blob };
+      setConvertProgress(100);
+      return blob;
+    } catch (err) {
+      onToast('Conversion failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      return null;
+    } finally {
+      setConverting(false);
+    }
+  }, [recordedBlob, recordedFormat, loadFFmpeg, onToast]);
+
+  const saveBlob = useCallback((blob: Blob, format: OutputFormat) => {
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `recording-${Date.now()}.webm`;
+    link.download = `recording-${Date.now()}.${format}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-    onToast('Download started');
-  }, [recordedBlob, onToast]);
+  }, []);
+
+  const download = useCallback(async (format: OutputFormat) => {
+    if (!recordedBlob || converting) return;
+
+    // Already in the requested format — no transcode
+    if (format === recordedFormat) {
+      saveBlob(recordedBlob, format);
+      onToast('Download started');
+      return;
+    }
+
+    // Reuse an earlier conversion of the same format
+    const cached = convertedRef.current;
+    if (cached && cached.format === format) {
+      saveBlob(cached.blob, format);
+      onToast('Download started');
+      return;
+    }
+
+    onToast(`Converting to ${format.toUpperCase()}...`);
+    const blob = await convertTo(format);
+    if (blob) {
+      saveBlob(blob, format);
+      onToast('Download started');
+    }
+  }, [recordedBlob, recordedFormat, converting, convertTo, saveBlob, onToast]);
 
   const handleClear = useCallback(() => {
     cleanup();
     if (previewUrl) URL.revokeObjectURL(previewUrl);
+    convertedRef.current = null;
     setIsRecording(false);
     setIsPaused(false);
     setRecordedBlob(null);
+    setRecordedMime('');
     setPreviewUrl('');
     setDuration(0);
     setFileSize(0);
     setResolution(null);
+    setConverting(false);
+    setConvertProgress(0);
     if (videoRef.current) videoRef.current.srcObject = null;
     if (playbackRef.current) playbackRef.current.src = '';
     onStatusChange('idle');
@@ -310,13 +469,23 @@ export default function ScreenRecorderTool({
 
         {recordedBlob && (
           <>
-            <button onClick={download} className="btn-secondary inline-flex items-center gap-2 text-[12px] px-4 py-2">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Download WebM
-            </button>
-            <button onClick={startRecording} className="btn-ghost text-[12px] px-3 py-2">
+            {(['webm', 'mp4'] as OutputFormat[]).map((fmt) => (
+              <button
+                key={fmt}
+                onClick={() => download(fmt)}
+                disabled={converting}
+                className={`btn-secondary inline-flex items-center gap-2 text-[12px] px-4 py-2 ${converting ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download {fmt.toUpperCase()}
+                {fmt !== recordedFormat && convertedRef.current?.format !== fmt && (
+                  <span className="text-[10px] text-zinc-600">converts</span>
+                )}
+              </button>
+            ))}
+            <button onClick={startRecording} disabled={converting} className={`btn-ghost text-[12px] px-3 py-2 ${converting ? 'opacity-50 cursor-not-allowed' : ''}`}>
               New Recording
             </button>
           </>
@@ -328,8 +497,29 @@ export default function ScreenRecorderTool({
           </button>
         )}
 
-        {/* FPS & Mic toggles */}
-        <div className="ml-auto flex items-center gap-2">
+        {/* Format, FPS & Mic toggles */}
+        <div className="ml-auto flex flex-wrap items-center gap-2">
+          {/* Format toggle — only meaningful when the browser can record MP4 directly */}
+          {nativeMp4 && !recordedBlob && (
+            <div className="flex items-center gap-2 pr-2 mr-1 border-r border-white/[0.08]">
+              {(['webm', 'mp4'] as OutputFormat[]).map((fmt) => (
+                <button
+                  key={fmt}
+                  onClick={() => setRecordFormat(fmt)}
+                  disabled={isRecording}
+                  title={`Record directly as ${fmt.toUpperCase()}`}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-all duration-200 ${
+                    recordFormat === fmt
+                      ? 'bg-purple-500/15 border-purple-500/30 text-purple-300'
+                      : 'bg-white/[0.03] border-white/[0.08] text-zinc-500 hover:text-zinc-300 hover:border-white/[0.12]'
+                  } ${isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {fmt.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* FPS toggle */}
           {([30, 60] as FrameRate[]).map((fps) => (
             <button
@@ -383,6 +573,27 @@ export default function ScreenRecorderTool({
               Mic active
             </span>
           )}
+        </div>
+      )}
+
+      {/* Conversion progress */}
+      {converting && (
+        <div className="rounded-lg glass-panel px-4 py-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[12px] text-zinc-400">
+              {ffmpegLoading ? 'Loading FFmpeg engine...' : 'Converting video...'}
+            </span>
+            <span className="text-[12px] font-mono text-purple-400">{convertProgress}%</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
+            <div
+              className="h-full rounded-full bg-purple-400/70 transition-all duration-300"
+              style={{ width: `${ffmpegLoading ? 0 : convertProgress}%` }}
+            />
+          </div>
+          <p className="mt-2 text-[11px] text-zinc-600">
+            Runs entirely in your browser — long recordings can take a while.
+          </p>
         </div>
       )}
 
@@ -491,7 +702,7 @@ export default function ScreenRecorderTool({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[12px] text-zinc-500">Format</span>
-                  <span className="text-[12px] font-mono text-zinc-300">WebM (VP9)</span>
+                  <span className="text-[12px] font-mono text-zinc-300">{formatLabel}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-[12px] text-zinc-500">Resolution</span>
@@ -520,7 +731,7 @@ export default function ScreenRecorderTool({
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="w-4 h-4 rounded-full bg-purple-500/15 border border-purple-500/20 flex items-center justify-center flex-shrink-0 mt-0.5 text-[9px] font-bold text-purple-400">3</span>
-                  <span className="text-[12px] text-zinc-500">Stop &amp; download as WebM video</span>
+                  <span className="text-[12px] text-zinc-500">Stop &amp; download as WebM or MP4</span>
                 </li>
               </ol>
             </div>
@@ -541,7 +752,7 @@ export default function ScreenRecorderTool({
           </div>
           <div className="rounded-lg glass-panel p-3">
             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Format</p>
-            <p className="text-[13px] font-mono text-zinc-300">WebM</p>
+            <p className="text-[13px] font-mono text-zinc-300">{activeFormat.toUpperCase()}</p>
           </div>
           <div className="rounded-lg glass-panel p-3">
             <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1">Resolution</p>
@@ -562,6 +773,7 @@ export default function ScreenRecorderTool({
           <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">Browser</span> — Works in Chrome, Edge, and Firefox</p>
           <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">Microphone</span> — Enable before starting to narrate</p>
           <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">System Audio</span> — Only available when sharing a browser tab in Chrome</p>
+          <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">MP4</span> — {nativeMp4 ? 'Pick MP4 before recording for an instant download, or convert afterwards' : 'Your browser records WebM, so MP4 downloads are converted in-browser'}</p>
           <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">Privacy</span> — Recording stays in your browser, never uploaded</p>
         </div>
       </div>

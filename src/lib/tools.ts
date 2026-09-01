@@ -32,7 +32,7 @@ export const TOOL_META: Record<ToolId, { title: string; desc: string; accent: st
   cron: { title: 'Cron Builder', desc: 'Build, parse, and validate cron expressions with a visual editor and next-run preview.', accent: 'bg-purple-400' },
   'bg-remover': { title: 'BG Remover', desc: 'Remove image backgrounds with AI — runs 100% in your browser using on-device ML.', accent: 'bg-pink-400' },
   'image-compress': { title: 'Image Compress', desc: 'Compress images with adjustable quality, format selection, and before/after size comparison.', accent: 'bg-pink-400' },
-  'screen-recorder': { title: 'Screen Recorder', desc: 'Record your screen, window, or browser tab with optional mic audio. Download as WebM.', accent: 'bg-blue-400' },
+  'screen-recorder': { title: 'Screen Recorder', desc: 'Record your screen, window, or browser tab with optional mic audio. Download as WebM or MP4.', accent: 'bg-blue-400' },
   'px-converter': { title: 'PX ↔ REM / Tailwind', desc: 'Convert pixels to rem units and Tailwind CSS spacing classes. Configurable base font size.', accent: 'bg-purple-400' },
   'video-compress': { title: 'Video Compress', desc: 'Compress videos with adjustable quality and resolution. Runs 100% in your browser using FFmpeg WebAssembly.', accent: 'bg-violet-400' },
 };
@@ -162,7 +162,7 @@ export const TOOL_SEO: Record<ToolId, { title: string; description: string }> = 
   markdown: { title: 'Markdown Preview — Live Editor', description: 'Write or paste markdown and see a live rendered preview with GitHub Flavored Markdown support. Free online markdown editor.' },
   epoch: { title: 'Epoch Converter — Unix Timestamp to Date', description: 'Convert between Unix epoch timestamps and human-readable dates with relative time display. Free batch epoch converter.' },
   cron: { title: 'Cron Expression Builder & Parser', description: 'Build, parse, and validate cron expressions with a visual editor. Preview next scheduled runs. Free online cron builder.' },
-  'screen-recorder': { title: 'Screen Recorder — Record Screen Online Free', description: 'Record your screen, application window, or browser tab with optional microphone audio. Download as WebM. 100% browser-based, nothing uploaded.' },
+  'screen-recorder': { title: 'Screen Recorder — Record Screen Online Free', description: 'Record your screen, application window, or browser tab with optional microphone audio. Download as WebM or MP4. 100% browser-based, nothing uploaded.' },
   base64: { title: 'Base64 Encoder & Decoder Online', description: 'Encode text to Base64 or decode Base64 back to plain text with full Unicode support. Free online Base64 tool.' },
   color: { title: 'Color Picker — HEX, RGB, HSL', description: 'Pick colors with an interactive color wheel. Copy hex, RGB, and HSL values instantly. Free online color picker tool.' },
   lorem: { title: 'Lorem Ipsum Generator', description: 'Generate lorem ipsum placeholder text by paragraphs, sentences, or words. Quick presets for common lengths. Free online text generator.' },
