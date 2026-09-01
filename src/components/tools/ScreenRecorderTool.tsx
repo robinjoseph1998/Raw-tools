@@ -44,6 +44,14 @@ function pickMimeType(format: OutputFormat): string {
   return candidates.find(t => MediaRecorder.isTypeSupported(t)) ?? '';
 }
 
+// Recording MP4 and playing it back are separate capabilities: Chromium on
+// Linux often muxes MP4 while lacking a proprietary H.264 decoder, which
+// yields a recording that plays audio with a blank picture.
+function canPlayMp4(): boolean {
+  if (typeof document === 'undefined') return false;
+  return document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"') !== '';
+}
+
 export default function ScreenRecorderTool({
   onStatusChange,
   onToast,
@@ -56,8 +64,9 @@ export default function ScreenRecorderTool({
     return !navigator.mediaDevices?.getDisplayMedia;
   }, []);
 
-  // Chrome 126+ and Safari can record MP4 directly — no transcode needed
-  const nativeMp4 = useMemo(() => pickMimeType('mp4') !== '', []);
+  // Only take the native MP4 path when the browser can both record AND play it,
+  // otherwise record WebM and transcode on download so the preview always works.
+  const nativeMp4 = useMemo(() => pickMimeType('mp4') !== '' && canPlayMp4(), []);
 
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -70,6 +79,9 @@ export default function ScreenRecorderTool({
   const [duration, setDuration] = useState(0);
   const [fileSize, setFileSize] = useState(0);
   const [resolution, setResolution] = useState<{ w: number; h: number } | null>(null);
+
+  // Set when the recording loads but decodes no video track (blank picture)
+  const [previewBroken, setPreviewBroken] = useState(false);
 
   // Transcode state (only used when the requested format wasn't recorded natively)
   const [converting, setConverting] = useState(false);
@@ -169,8 +181,9 @@ export default function ScreenRecorderTool({
         videoRef.current.play().catch(() => {});
       }
 
-      // Setup MediaRecorder — fall back to WebM if MP4 recording isn't supported
-      const mimeType = pickMimeType(recordFormat) || pickMimeType('webm') || 'video/webm';
+      // Setup MediaRecorder — plannedFormat already downgrades MP4 to WebM
+      // when the browser can't play its own MP4 output back
+      const mimeType = pickMimeType(plannedFormat) || pickMimeType('webm') || 'video/webm';
 
       const recorder = new MediaRecorder(recordStream, { mimeType });
       recorderRef.current = recorder;
@@ -225,6 +238,7 @@ export default function ScreenRecorderTool({
       setFileSize(0);
       setConverting(false);
       setConvertProgress(0);
+      setPreviewBroken(false);
       onStatusChange('idle');
 
       // Start timer
@@ -241,7 +255,7 @@ export default function ScreenRecorderTool({
         onStatusChange('invalid');
       }
     }
-  }, [frameRate, recordFormat, micEnabled, previewUrl, cleanup, onStatusChange, onToast]);
+  }, [frameRate, plannedFormat, micEnabled, previewUrl, cleanup, onStatusChange, onToast]);
 
   const pauseRecording = useCallback(() => {
     if (recorderRef.current && recorderRef.current.state === 'recording') {
@@ -403,6 +417,7 @@ export default function ScreenRecorderTool({
     setResolution(null);
     setConverting(false);
     setConvertProgress(0);
+    setPreviewBroken(false);
     if (videoRef.current) videoRef.current.srcObject = null;
     if (playbackRef.current) playbackRef.current.src = '';
     onStatusChange('idle');
@@ -623,13 +638,26 @@ export default function ScreenRecorderTool({
             />
             {/* Playback after recording */}
             {!isRecording && previewUrl && (
-              <video
-                ref={playbackRef}
-                src={previewUrl}
-                controls
-                playsInline
-                className="max-w-full max-h-[340px] rounded-lg"
-              />
+              <div className="flex flex-col items-center gap-3 w-full">
+                <video
+                  ref={playbackRef}
+                  src={previewUrl}
+                  controls
+                  playsInline
+                  onLoadedMetadata={(e) => setPreviewBroken(e.currentTarget.videoWidth === 0)}
+                  onError={() => setPreviewBroken(true)}
+                  className="max-w-full max-h-[340px] rounded-lg"
+                />
+                {previewBroken && (
+                  <div className="max-w-md rounded-lg bg-amber-500/[0.07] border border-amber-500/20 px-3 py-2.5 text-center">
+                    <p className="text-[12px] text-amber-300/90 font-medium">This browser can&apos;t display the recorded video</p>
+                    <p className="mt-1 text-[11px] text-zinc-500 leading-relaxed">
+                      It has no decoder for this format, so the preview is blank. The file itself is fine —
+                      download it and play it in a media player, or record in WebM instead.
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
             {/* Empty state */}
             {!isRecording && !previewUrl && (
