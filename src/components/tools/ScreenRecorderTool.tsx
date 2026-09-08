@@ -24,11 +24,15 @@ function baseType(mime: string): string {
   return mime.split(';')[0].trim();
 }
 
+// Deliberately unpinned: a codec string like avc1.42E01E declares H.264
+// Level 3.0 (max 1620 macroblocks/frame), which 1080p60 exceeds ~12x.
+// isTypeSupported() can't catch that — it doesn't know the resolution yet —
+// so the encoder only fails later, at capture time. Letting the browser pick
+// the profile and level for the actual stream avoids the mismatch entirely.
 const MP4_CANDIDATES = [
-  'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+  'video/mp4',
   'video/mp4;codecs=avc1,mp4a.40.2',
   'video/mp4;codecs=h264,aac',
-  'video/mp4',
 ];
 
 const WEBM_CANDIDATES = [
@@ -37,11 +41,29 @@ const WEBM_CANDIDATES = [
   'video/webm',
 ];
 
+function candidatesFor(format: OutputFormat): string[] {
+  return format === 'mp4' ? MP4_CANDIDATES : WEBM_CANDIDATES;
+}
+
 // First candidate the browser can actually record, or '' if none
 function pickMimeType(format: OutputFormat): string {
   if (typeof MediaRecorder === 'undefined') return '';
-  const candidates = format === 'mp4' ? MP4_CANDIDATES : WEBM_CANDIDATES;
-  return candidates.find(t => MediaRecorder.isTypeSupported(t)) ?? '';
+  return candidatesFor(format).find(t => MediaRecorder.isTypeSupported(t)) ?? '';
+}
+
+// isTypeSupported() only vets the string, so construction is the real test.
+// Walk the preferred types, then WebM, then let the browser choose outright.
+function createRecorder(stream: MediaStream, format: OutputFormat): MediaRecorder {
+  const types = [...candidatesFor(format), ...WEBM_CANDIDATES];
+  for (const mimeType of types) {
+    if (!MediaRecorder.isTypeSupported(mimeType)) continue;
+    try {
+      return new MediaRecorder(stream, { mimeType });
+    } catch {
+      // Declared type the encoder can't honour for this stream — keep going
+    }
+  }
+  return new MediaRecorder(stream);
 }
 
 // Recording MP4 and playing it back are separate capabilities: Chromium on
@@ -104,7 +126,7 @@ export default function ScreenRecorderTool({
   const recordedFormat: OutputFormat = baseType(recordedMime) === 'video/mp4' ? 'mp4' : 'webm';
   // What will actually be recorded — MP4 falls back to WebM without native support
   const plannedFormat: OutputFormat = nativeMp4 ? recordFormat : 'webm';
-  const activeFormat = recordedBlob ? recordedFormat : plannedFormat;
+  const activeFormat = recordedMime ? recordedFormat : plannedFormat;
   const formatLabel = activeFormat === 'mp4' ? 'MP4 (H.264)' : 'WebM (VP9)';
 
   // Cleanup all streams and timers
@@ -153,6 +175,11 @@ export default function ScreenRecorderTool({
 
           const ctx = new AudioContext();
           audioCtxRef.current = ctx;
+
+          // Created after two awaits, so it's outside the click gesture and can
+          // start suspended — that emits a silent track and stalls the muxer.
+          if (ctx.state === 'suspended') await ctx.resume();
+
           const dest = ctx.createMediaStreamDestination();
 
           // Add screen audio tracks (if any)
@@ -181,16 +208,27 @@ export default function ScreenRecorderTool({
         videoRef.current.play().catch(() => {});
       }
 
-      // Setup MediaRecorder — plannedFormat already downgrades MP4 to WebM
-      // when the browser can't play its own MP4 output back
-      const mimeType = pickMimeType(plannedFormat) || pickMimeType('webm') || 'video/webm';
-
-      const recorder = new MediaRecorder(recordStream, { mimeType });
+      // plannedFormat already downgrades MP4 to WebM when the browser
+      // can't play its own MP4 output back
+      const recorder = createRecorder(recordStream, plannedFormat);
+      // What the browser actually settled on, which may not be what we asked for
+      const mimeType = recorder.mimeType || pickMimeType(plannedFormat) || 'video/webm';
       recorderRef.current = recorder;
       chunksRef.current = [];
 
       recorder.ondataavailable = (e) => {
         if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
+
+      // Encoder failures after start() surface here, not as a thrown error
+      recorder.onerror = (e) => {
+        const err = (e as unknown as { error?: DOMException }).error;
+        onToast(`Recording error: ${err?.message || err?.name || 'encoder failed'}`);
+        onStatusChange('invalid');
+        setIsRecording(false);
+        setIsPaused(false);
+        if (videoRef.current) videoRef.current.srcObject = null;
+        cleanup();
       };
 
       recorder.onstop = () => {
@@ -227,12 +265,17 @@ export default function ScreenRecorderTool({
       };
 
       recorder.start(1000); // collect data every second
+
+      if (plannedFormat === 'mp4' && baseType(mimeType) !== 'video/mp4') {
+        onToast('MP4 unavailable at these settings — recording WebM');
+      }
+
       recordedFpsRef.current = frameRate;
       convertedRef.current = null;
       setIsRecording(true);
       setIsPaused(false);
       setRecordedBlob(null);
-      setRecordedMime('');
+      setRecordedMime(mimeType);
       setPreviewUrl('');
       setDuration(0);
       setFileSize(0);
@@ -248,10 +291,22 @@ export default function ScreenRecorderTool({
       }, 1000);
 
     } catch (err) {
-      // User cancelled the picker or permission denied
+      // getDisplayMedia may already have granted a stream before we failed —
+      // without this the share stays live and the browser keeps showing
+      // "you are sharing your screen" with no way to stop it
+      cleanup();
+      if (videoRef.current) videoRef.current.srcObject = null;
+      setIsRecording(false);
+
+      const name = err instanceof DOMException ? err.name : '';
       const msg = err instanceof Error ? err.message : 'Recording failed';
-      if (!msg.includes('cancel') && !msg.includes('abort') && !msg.includes('Permission')) {
-        onToast('Failed to start recording');
+
+      // User dismissed the picker — not an error worth reporting
+      const cancelled = name === 'NotAllowedError' || name === 'AbortError'
+        || /cancel|abort|permission/i.test(msg);
+
+      if (!cancelled) {
+        onToast(`Couldn't start recording: ${msg || name || 'unknown error'}`);
         onStatusChange('invalid');
       }
     }
