@@ -18,6 +18,56 @@ function formatBytes(n: number): string {
 
 type FrameRate = 30 | 60;
 type OutputFormat = 'webm' | 'mp4';
+// Region to record, in capture pixels
+type CropRect = { x: number; y: number; w: number; h: number };
+
+// Insertable-streams track types — Chromium-only, missing from lib.dom
+type TrackProcessorCtor = new (init: { track: MediaStreamTrack }) => { readable: ReadableStream<VideoFrame> };
+type TrackGeneratorCtor = new (init: { kind: 'video' }) => MediaStreamTrack & { writable: WritableStream<VideoFrame> };
+
+function cropCtors() {
+  if (typeof window === 'undefined') return null;
+  const w = window as unknown as {
+    MediaStreamTrackProcessor?: TrackProcessorCtor;
+    MediaStreamTrackGenerator?: TrackGeneratorCtor;
+  };
+  return w.MediaStreamTrackProcessor && w.MediaStreamTrackGenerator
+    ? { Processor: w.MediaStreamTrackProcessor, Generator: w.MediaStreamTrackGenerator }
+    : null;
+}
+
+// Crop a video track by rewriting each frame's visibleRect — a metadata-only
+// crop that costs no pixel copies and, unlike a canvas draw loop, keeps
+// producing frames while the tab is hidden. 4:2:0 frames need even-aligned
+// rects, and the rect is re-clamped per frame since the source can resize.
+function buildCroppedTrack(track: MediaStreamTrack, rect: CropRect): MediaStreamTrack | null {
+  const ctors = cropCtors();
+  if (!ctors) return null;
+  const processor = new ctors.Processor({ track });
+  const generator = new ctors.Generator({ kind: 'video' });
+  const even = (n: number) => Math.max(0, 2 * Math.floor(n / 2));
+  const transformer = new TransformStream<VideoFrame, VideoFrame>({
+    transform(frame, controller) {
+      try {
+        const x = Math.min(even(rect.x), even(frame.codedWidth - 16));
+        const y = Math.min(even(rect.y), even(frame.codedHeight - 16));
+        const width = Math.max(16, Math.min(even(rect.w), even(frame.codedWidth - x)));
+        const height = Math.max(16, Math.min(even(rect.h), even(frame.codedHeight - y)));
+        const cropped = new VideoFrame(frame as CanvasImageSource, {
+          timestamp: frame.timestamp,
+          visibleRect: { x, y, width, height },
+        } as VideoFrameInit);
+        frame.close();
+        controller.enqueue(cropped);
+      } catch {
+        // Unexpected frame format — pass it through uncropped rather than die
+        controller.enqueue(frame);
+      }
+    },
+  });
+  processor.readable.pipeThrough(transformer).pipeTo(generator.writable).catch(() => {});
+  return generator;
+}
 
 // 'video/webm;codecs=vp9,opus' -> 'video/webm'
 function baseType(mime: string): string {
@@ -74,6 +124,15 @@ function canPlayMp4(): boolean {
   return document.createElement('video').canPlayType('video/mp4; codecs="avc1.42E01E"') !== '';
 }
 
+// Chrome has no AAC encoder, so its native MP4 recordings carry Opus audio —
+// which most players (Windows Media Player/Photos, QuickTime, editors) can't
+// decode inside an MP4. The browser preview plays it, the downloaded file is
+// silent. If the browser can't record AAC, the download needs an audio remux.
+function mp4AudioNeedsRemux(): boolean {
+  if (typeof MediaRecorder === 'undefined') return false;
+  return !MediaRecorder.isTypeSupported('video/mp4;codecs=avc1,mp4a.40.2');
+}
+
 export default function ScreenRecorderTool({
   onStatusChange,
   onToast,
@@ -90,9 +149,18 @@ export default function ScreenRecorderTool({
   // otherwise record WebM and transcode on download so the preview always works.
   const nativeMp4 = useMemo(() => pickMimeType('mp4') !== '' && canPlayMp4(), []);
 
+  const cropSupported = useMemo(() => cropCtors() !== null, []);
+
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [micEnabled, setMicEnabled] = useState(false);
+  const [cropEnabled, setCropEnabled] = useState(false);
+  // Share accepted, waiting for the user to drag a region on the preview
+  const [isSelecting, setIsSelecting] = useState(false);
+  // Drag selection, in preview-element CSS pixels
+  const [selRect, setSelRect] = useState<CropRect | null>(null);
+  // True while the active recording is cropped (keeps the region outline up)
+  const [cropActive, setCropActive] = useState(false);
   const [frameRate, setFrameRate] = useState<FrameRate>(30);
   const [recordFormat, setRecordFormat] = useState<OutputFormat>('webm');
   const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
@@ -119,6 +187,9 @@ export default function ScreenRecorderTool({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const ffmpegRef = useRef<import('@ffmpeg/ffmpeg').FFmpeg | null>(null);
+  const croppedTrackRef = useRef<MediaStreamTrack | null>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   // Converted output is cached so re-downloading the same format is instant
   const convertedRef = useRef<{ format: OutputFormat; blob: Blob } | null>(null);
   const recordedFpsRef = useRef<FrameRate>(30);
@@ -135,6 +206,7 @@ export default function ScreenRecorderTool({
     if (streamRef.current) { streamRef.current.getTracks().forEach(t => t.stop()); streamRef.current = null; }
     if (micStreamRef.current) { micStreamRef.current.getTracks().forEach(t => t.stop()); micStreamRef.current = null; }
     if (audioCtxRef.current) { audioCtxRef.current.close().catch(() => {}); audioCtxRef.current = null; }
+    if (croppedTrackRef.current) { croppedTrackRef.current.stop(); croppedTrackRef.current = null; }
     recorderRef.current = null;
     chunksRef.current = [];
   }, []);
@@ -148,24 +220,35 @@ export default function ScreenRecorderTool({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const startRecording = useCallback(async () => {
+  // Abandon a crop selection: drop the captured stream and reset the preview
+  const cancelSelection = useCallback(() => {
+    cleanup();
+    setIsSelecting(false);
+    setSelRect(null);
+    if (videoRef.current) videoRef.current.srcObject = null;
+    onStatusChange('idle');
+  }, [cleanup, onStatusChange]);
+
+  // Phase 2: wire audio and start MediaRecorder on an already-captured
+  // stream, optionally cropped to `cropRect` (in capture pixels)
+  const beginRecording = useCallback(async (screenStream: MediaStream, cropRect: CropRect | null) => {
     try {
-      // Get screen stream with frame rate
-      const screenStream = await navigator.mediaDevices.getDisplayMedia({
-        video: { frameRate: { ideal: frameRate } },
-        audio: true,
-      });
+      let recordVideoTrack = screenStream.getVideoTracks()[0];
 
-      streamRef.current = screenStream;
-
-      // Get resolution from video track
-      const videoTrack = screenStream.getVideoTracks()[0];
-      const settings = videoTrack.getSettings();
-      if (settings.width && settings.height) {
-        setResolution({ w: settings.width, h: settings.height });
+      if (cropRect) {
+        const cropped = buildCroppedTrack(recordVideoTrack, cropRect);
+        if (cropped) {
+          croppedTrackRef.current = cropped;
+          recordVideoTrack = cropped;
+          setResolution({ w: cropRect.w - (cropRect.w % 2), h: cropRect.h - (cropRect.h % 2) });
+        } else {
+          onToast('Crop not supported in this browser — recording the full screen');
+          cropRect = null;
+        }
       }
+      setCropActive(cropRect !== null);
 
-      let recordStream = screenStream;
+      let audioTracks = screenStream.getAudioTracks();
 
       // If mic enabled, merge audio
       if (micEnabled) {
@@ -176,7 +259,7 @@ export default function ScreenRecorderTool({
           const ctx = new AudioContext();
           audioCtxRef.current = ctx;
 
-          // Created after two awaits, so it's outside the click gesture and can
+          // Created after awaits, so it's outside the click gesture and can
           // start suspended — that emits a silent track and stalls the muxer.
           if (ctx.state === 'suspended') await ctx.resume();
 
@@ -192,21 +275,13 @@ export default function ScreenRecorderTool({
           const micSource = ctx.createMediaStreamSource(micStream);
           micSource.connect(dest);
 
-          // Create merged stream: screen video + merged audio
-          recordStream = new MediaStream([
-            ...screenStream.getVideoTracks(),
-            ...dest.stream.getAudioTracks(),
-          ]);
+          audioTracks = dest.stream.getAudioTracks();
         } catch {
           onToast('Mic access denied — recording without mic');
         }
       }
 
-      // Show live preview
-      if (videoRef.current) {
-        videoRef.current.srcObject = screenStream;
-        videoRef.current.play().catch(() => {});
-      }
+      const recordStream = new MediaStream([recordVideoTrack, ...audioTracks]);
 
       // plannedFormat already downgrades MP4 to WebM when the browser
       // can't play its own MP4 output back
@@ -227,6 +302,7 @@ export default function ScreenRecorderTool({
         onStatusChange('invalid');
         setIsRecording(false);
         setIsPaused(false);
+        setCropActive(false);
         if (videoRef.current) videoRef.current.srcObject = null;
         cleanup();
       };
@@ -241,6 +317,7 @@ export default function ScreenRecorderTool({
         setFileSize(blob.size);
         setIsRecording(false);
         setIsPaused(false);
+        setCropActive(false);
         onStatusChange('valid');
         onToast('Recording saved');
 
@@ -257,13 +334,6 @@ export default function ScreenRecorderTool({
         cleanup();
       };
 
-      // Handle user clicking browser's "Stop sharing" button
-      videoTrack.onended = () => {
-        if (recorderRef.current && recorderRef.current.state !== 'inactive') {
-          recorderRef.current.stop();
-        }
-      };
-
       recorder.start(1000); // collect data every second
 
       if (plannedFormat === 'mp4' && baseType(mimeType) !== 'video/mp4') {
@@ -274,6 +344,7 @@ export default function ScreenRecorderTool({
       convertedRef.current = null;
       setIsRecording(true);
       setIsPaused(false);
+      setIsSelecting(false);
       setRecordedBlob(null);
       setRecordedMime(mimeType);
       setPreviewUrl('');
@@ -291,12 +362,66 @@ export default function ScreenRecorderTool({
       }, 1000);
 
     } catch (err) {
+      cleanup();
+      if (videoRef.current) videoRef.current.srcObject = null;
+      setIsRecording(false);
+      setIsSelecting(false);
+      const msg = err instanceof Error ? err.message : 'Recording failed';
+      onToast(`Couldn't start recording: ${msg || 'unknown error'}`);
+      onStatusChange('invalid');
+    }
+  }, [frameRate, plannedFormat, micEnabled, previewUrl, cleanup, onStatusChange, onToast]);
+
+  const startRecording = useCallback(async () => {
+    try {
+      // Get screen stream with frame rate
+      const screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { frameRate: { ideal: frameRate } },
+        audio: true,
+      });
+
+      streamRef.current = screenStream;
+
+      // Get resolution from video track
+      const videoTrack = screenStream.getVideoTracks()[0];
+      const settings = videoTrack.getSettings();
+      if (settings.width && settings.height) {
+        setResolution({ w: settings.width, h: settings.height });
+      }
+
+      // Show live preview
+      if (videoRef.current) {
+        videoRef.current.srcObject = screenStream;
+        videoRef.current.play().catch(() => {});
+      }
+
+      // Browser's "Stop sharing" button: stop an active recording, or abandon
+      // a crop selection that's still waiting on the user
+      videoTrack.onended = () => {
+        if (recorderRef.current && recorderRef.current.state !== 'inactive') {
+          recorderRef.current.stop();
+        } else {
+          cancelSelection();
+        }
+      };
+
+      if (cropEnabled && cropSupported) {
+        // Recording starts when the user confirms a region on the preview
+        setIsSelecting(true);
+        setSelRect(null);
+        onStatusChange('idle');
+        return;
+      }
+
+      await beginRecording(screenStream, null);
+    } catch (err) {
       // getDisplayMedia may already have granted a stream before we failed —
       // without this the share stays live and the browser keeps showing
       // "you are sharing your screen" with no way to stop it
       cleanup();
       if (videoRef.current) videoRef.current.srcObject = null;
       setIsRecording(false);
+      setIsSelecting(false);
 
       const name = err instanceof DOMException ? err.name : '';
       const msg = err instanceof Error ? err.message : 'Recording failed';
@@ -310,7 +435,58 @@ export default function ScreenRecorderTool({
         onStatusChange('invalid');
       }
     }
-  }, [frameRate, plannedFormat, micEnabled, previewUrl, cleanup, onStatusChange, onToast]);
+  }, [frameRate, cropEnabled, cropSupported, beginRecording, cancelSelection, cleanup, onStatusChange, onToast]);
+
+  // Confirm the crop selection (or record the full screen when nothing was
+  // dragged) — maps the preview-pixel rect onto capture pixels
+  const confirmCrop = useCallback(async () => {
+    const stream = streamRef.current;
+    const video = videoRef.current;
+    if (!stream || !video) return;
+
+    let rect: CropRect | null = null;
+    if (selRect && selRect.w >= 10 && selRect.h >= 10 && video.videoWidth > 0) {
+      const box = video.getBoundingClientRect();
+      const scaleX = video.videoWidth / box.width;
+      const scaleY = video.videoHeight / box.height;
+      rect = {
+        x: Math.round(selRect.x * scaleX),
+        y: Math.round(selRect.y * scaleY),
+        w: Math.round(selRect.w * scaleX),
+        h: Math.round(selRect.h * scaleY),
+      };
+    }
+
+    await beginRecording(stream, rect);
+  }, [selRect, beginRecording]);
+
+  const onCropPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const box = overlay.getBoundingClientRect();
+    dragStartRef.current = { x: e.clientX - box.left, y: e.clientY - box.top };
+    setSelRect(null);
+    overlay.setPointerCapture(e.pointerId);
+  }, []);
+
+  const onCropPointerMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    const overlay = overlayRef.current;
+    const start = dragStartRef.current;
+    if (!overlay || !start) return;
+    const box = overlay.getBoundingClientRect();
+    const cx = Math.min(Math.max(e.clientX - box.left, 0), box.width);
+    const cy = Math.min(Math.max(e.clientY - box.top, 0), box.height);
+    setSelRect({
+      x: Math.min(start.x, cx),
+      y: Math.min(start.y, cy),
+      w: Math.abs(cx - start.x),
+      h: Math.abs(cy - start.y),
+    });
+  }, []);
+
+  const onCropPointerUp = useCallback(() => {
+    dragStartRef.current = null;
+  }, []);
 
   const pauseRecording = useCallback(() => {
     if (recorderRef.current && recorderRef.current.state === 'recording') {
@@ -361,8 +537,10 @@ export default function ScreenRecorderTool({
     }
   }, []);
 
-  // Transcode the recording into `target` with ffmpeg.wasm
-  const convertTo = useCallback(async (target: OutputFormat): Promise<Blob | null> => {
+  // Transcode the recording into `target` with ffmpeg.wasm. With `copyVideo`
+  // the video stream passes through untouched and only audio is re-encoded —
+  // fast, used to swap Opus for AAC in native MP4 recordings.
+  const convertTo = useCallback(async (target: OutputFormat, copyVideo = false): Promise<Blob | null> => {
     if (!recordedBlob) return null;
     setConverting(true);
     setConvertProgress(0);
@@ -382,10 +560,13 @@ export default function ScreenRecorderTool({
 
       // MediaRecorder output is variable frame rate with no duration header,
       // so regenerate timestamps and pin the output to the recorded frame rate.
-      const args = ['-fflags', '+genpts', '-i', inputName, '-r', String(recordedFpsRef.current)];
+      const args = ['-fflags', '+genpts', '-i', inputName];
 
-      if (target === 'mp4') {
+      if (copyVideo) {
+        args.push('-c:v', 'copy', '-c:a', 'aac', '-b:a', '128k', '-movflags', '+faststart');
+      } else if (target === 'mp4') {
         args.push(
+          '-r', String(recordedFpsRef.current),
           '-c:v', 'libx264',
           '-preset', 'veryfast',
           '-crf', '23',
@@ -395,7 +576,7 @@ export default function ScreenRecorderTool({
           '-movflags', '+faststart',
         );
       } else {
-        args.push('-c:v', 'libvpx-vp9', '-crf', '32', '-b:v', '0', '-c:a', 'libopus');
+        args.push('-r', String(recordedFpsRef.current), '-c:v', 'libvpx-vp9', '-crf', '32', '-b:v', '0', '-c:a', 'libopus');
       }
 
       args.push(outputName);
@@ -435,17 +616,27 @@ export default function ScreenRecorderTool({
   const download = useCallback(async (format: OutputFormat) => {
     if (!recordedBlob || converting) return;
 
-    // Already in the requested format — no transcode
-    if (format === recordedFormat) {
-      saveBlob(recordedBlob, format);
-      onToast('Download started');
-      return;
-    }
-
     // Reuse an earlier conversion of the same format
     const cached = convertedRef.current;
     if (cached && cached.format === format) {
       saveBlob(cached.blob, format);
+      onToast('Download started');
+      return;
+    }
+
+    // Already in the requested format — no transcode, except native MP4 with
+    // Opus audio, which is remuxed to AAC so players outside the browser
+    // aren't silent
+    if (format === recordedFormat) {
+      if (format === 'mp4' && mp4AudioNeedsRemux()) {
+        onToast('Preparing MP4 audio...');
+        const blob = await convertTo('mp4', true);
+        // Remux failed — ship the original rather than nothing
+        saveBlob(blob ?? recordedBlob, 'mp4');
+        onToast('Download started');
+        return;
+      }
+      saveBlob(recordedBlob, format);
       onToast('Download started');
       return;
     }
@@ -464,6 +655,9 @@ export default function ScreenRecorderTool({
     convertedRef.current = null;
     setIsRecording(false);
     setIsPaused(false);
+    setIsSelecting(false);
+    setSelRect(null);
+    setCropActive(false);
     setRecordedBlob(null);
     setRecordedMime('');
     setPreviewUrl('');
@@ -500,7 +694,7 @@ export default function ScreenRecorderTool({
     <div className="space-y-4">
       {/* Action bar */}
       <div className="flex flex-wrap items-center gap-2.5">
-        {!isRecording && !recordedBlob && (
+        {!isRecording && !recordedBlob && !isSelecting && (
           <button onClick={startRecording} className="btn-primary inline-flex items-center gap-2 text-[12px] px-4 py-2">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="12" cy="12" r="10" />
@@ -537,7 +731,7 @@ export default function ScreenRecorderTool({
           </button>
         )}
 
-        {recordedBlob && (
+        {recordedBlob && !isSelecting && (
           <>
             {(['webm', 'mp4'] as OutputFormat[]).map((fmt) => (
               <button
@@ -561,7 +755,7 @@ export default function ScreenRecorderTool({
           </>
         )}
 
-        {(recordedBlob || isRecording) && (
+        {(recordedBlob || isRecording) && !isSelecting && (
           <button onClick={isRecording ? stopRecording : handleClear} className="btn-ghost text-[12px] px-3 py-2 text-zinc-600 hover:text-red-400">
             {isRecording ? '' : 'Clear'}
           </button>
@@ -588,6 +782,25 @@ export default function ScreenRecorderTool({
                 </button>
               ))}
             </div>
+          )}
+
+          {/* Crop toggle — needs insertable streams (Chromium) */}
+          {cropSupported && (
+            <button
+              onClick={() => setCropEnabled(v => !v)}
+              disabled={isRecording || isSelecting}
+              title="Record only a selected area of the screen"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-medium border transition-all duration-200 ${
+                cropEnabled
+                  ? 'bg-purple-500/15 border-purple-500/30 text-purple-300'
+                  : 'bg-white/[0.03] border-white/[0.08] text-zinc-500 hover:text-zinc-300 hover:border-white/[0.12]'
+              } ${isRecording || isSelecting ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path d="M6 2v14a2 2 0 002 2h14M18 22V8a2 2 0 00-2-2H2" />
+              </svg>
+              {cropEnabled ? 'Crop On' : 'Crop Off'}
+            </button>
           )}
 
           {/* FPS toggle */}
@@ -682,17 +895,61 @@ export default function ScreenRecorderTool({
               <span className="text-[11px] font-mono text-zinc-500">{resolution.w}x{resolution.h}</span>
             )}
           </div>
-          <div className="flex-1 flex items-center justify-center p-4 overflow-auto bg-black/20">
-            {/* Live preview while recording */}
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              playsInline
-              className={`max-w-full max-h-[340px] rounded-lg ${isRecording ? 'block' : 'hidden'}`}
-            />
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 p-4 overflow-auto bg-black/20">
+            {/* Live preview while recording or selecting a crop region */}
+            <div className={`relative ${isRecording || isSelecting ? 'block' : 'hidden'}`}>
+              <video
+                ref={videoRef}
+                autoPlay
+                muted
+                playsInline
+                className="max-w-full max-h-[340px] rounded-lg"
+              />
+              {isSelecting && (
+                <div
+                  ref={overlayRef}
+                  className="absolute inset-0 cursor-crosshair touch-none rounded-lg overflow-hidden"
+                  onPointerDown={onCropPointerDown}
+                  onPointerMove={onCropPointerMove}
+                  onPointerUp={onCropPointerUp}
+                >
+                  {selRect && selRect.w > 2 && selRect.h > 2 ? (
+                    <div
+                      className="absolute border-2 border-purple-400"
+                      style={{ left: selRect.x, top: selRect.y, width: selRect.w, height: selRect.h, boxShadow: '0 0 0 9999px rgba(0,0,0,0.55)' }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center pointer-events-none">
+                      <p className="text-[12px] text-zinc-200 bg-black/70 px-3 py-1.5 rounded-lg">Drag to select the area to record</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Region outline while a cropped recording is running */}
+              {isRecording && cropActive && selRect && (
+                <div
+                  className="absolute border-2 border-red-400/80 pointer-events-none"
+                  style={{ left: selRect.x, top: selRect.y, width: selRect.w, height: selRect.h }}
+                />
+              )}
+            </div>
+            {/* Crop selection controls */}
+            {isSelecting && (
+              <div className="flex items-center gap-2">
+                <button onClick={confirmCrop} className="btn-primary inline-flex items-center gap-2 text-[12px] px-4 py-2">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <circle cx="12" cy="12" r="10" />
+                    <circle cx="12" cy="12" r="4" fill="currentColor" />
+                  </svg>
+                  {selRect && selRect.w >= 10 && selRect.h >= 10 ? 'Record Selected Area' : 'Record Full Screen'}
+                </button>
+                <button onClick={cancelSelection} className="btn-ghost text-[12px] px-3 py-2 text-zinc-600 hover:text-red-400">
+                  Cancel
+                </button>
+              </div>
+            )}
             {/* Playback after recording */}
-            {!isRecording && previewUrl && (
+            {!isRecording && !isSelecting && previewUrl && (
               <div className="flex flex-col items-center gap-3 w-full">
                 <video
                   ref={playbackRef}
@@ -715,7 +972,7 @@ export default function ScreenRecorderTool({
               </div>
             )}
             {/* Empty state */}
-            {!isRecording && !previewUrl && (
+            {!isRecording && !isSelecting && !previewUrl && (
               <div className="flex flex-col items-center gap-3 text-center">
                 <svg className="h-10 w-10 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -856,6 +1113,9 @@ export default function ScreenRecorderTool({
           <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">Browser</span> — Works in Chrome, Edge, and Firefox</p>
           <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">Microphone</span> — Enable before starting to narrate</p>
           <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">System Audio</span> — Only available when sharing a browser tab in Chrome</p>
+          {cropSupported && (
+            <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">Crop</span> — Turn on Crop, then drag over the preview to record just that area</p>
+          )}
           <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">MP4</span> — {nativeMp4 ? 'Pick MP4 before recording for an instant download, or convert afterwards' : 'Your browser records WebM, so MP4 downloads are converted in-browser'}</p>
           <p className="text-[12px] text-zinc-500 leading-relaxed"><span className="text-zinc-300 font-medium">Privacy</span> — Recording stays in your browser, never uploaded</p>
         </div>
