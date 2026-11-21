@@ -382,7 +382,3 @@ Potential areas for further platform evolution:
 ---
 
 ## License
-
-This project is distributed under the **MIT License**.
-
-See the `LICENSE` file for applicable terms and conditions.
